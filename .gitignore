@@ -1,0 +1,56 @@
+# Object files
+*.o
+*.O
+*.ko
+*.obj
+*.elf
+*.pyc
+
+# Precompiled Headers
+*.gch
+*.pch
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+#*.hex
+
+# xc8
+*.err
+*.ERR
+*.as
+*.cmf
+*.cof
+*.hxl
+*.sdb
+*.sym
+*.lst
+*.LST
+*.rlf
+*.p1
+*.pre
+*.d
+
+# codeblocks
+*.depend
+*.layout
+
+#OSX
+*.DS_Store
+*._.DS_Store
+
+*.dropbox
