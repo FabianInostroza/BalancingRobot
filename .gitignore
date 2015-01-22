@@ -54,3 +54,6 @@
 *._.DS_Store
 
 *.dropbox
+
+# ejecutables
+interfaz/MPU6050/MPU6050
