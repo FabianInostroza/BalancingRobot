@@ -30,7 +30,15 @@ class MPU6050(object):
         azh = self.read(0x3f)
         azl = self.read(0x40)
 
-        return (axh*256+axl, ayh*256+ayl,azh*256+azl)
+        ax = axh*256+axl
+        ay = ayh*256+ayl
+        az = azh*256+azl
+
+        ax = (ax-(ax&0x8000)*2)
+        ay = (ay-(ay&0x8000)*2)
+        az = (az-(az&0x8000)*2)
+
+        return (ax, ay, az)
         
     def readGyro(self):
         gxh = self.read(0x43)
@@ -42,19 +50,31 @@ class MPU6050(object):
         gzh = self.read(0x47)
         gzl = self.read(0x48)
 
-        return (gxh*256+gxl, gyh*256+gyl, gzh*256+gzl)
+        gx = gxh*256+gxl
+        gy = gyh*256+gyl
+        gz = gzh*256+gzl
+
+        gx = (gx-(gx&0x8000)*2)
+        gy = (gy-(gy&0x8000)*2)
+        gz = (gz-(gz&0x8000)*2)
+
+        return (gx, gy, gz)
         
     def readTestRegs(self):
         tmp = self.read(0x0d)
+        print "%X"%(tmp)
         xgt = tmp & 0x1f
-        xat = (tmp & 0xc0) >> 3
+        xat = (tmp & 0xe0) >> 3
         tmp = self.read(0x0e)
+        print "%X"%(tmp)
         ygt = tmp & 0x1f
-        yat = (tmp & 0xc0) >> 3
+        yat = (tmp & 0xe0) >> 3
         tmp = self.read(0x0f)
+        print "%X"%(tmp)
         zgt = tmp & 0x1f
-        zat = (tmp & 0xc0) >> 3
+        zat = (tmp & 0xe0) >> 3
         tmp = self.read(0x10)
+        print "%X"%(tmp)
         zat = zat | (tmp & 0x3)
         yat = yat | ((tmp >> 2) & 0x3)
         xat = xat | ((tmp >> 4) & 0x3)
@@ -63,6 +83,7 @@ class MPU6050(object):
 
 ser = serial.Serial('/dev/ttyUSB0', 115200)
 
+sleep(1)
 mpu = MPU6050(ser)
 
 mpu.write(0x1a, 1) # accel bw=184Hz, gyro bw = 188Hz
@@ -71,30 +92,31 @@ mpu.write(0x19, 1) # sample rate divider = 2, fs = 1kHz/2 = 500Hz, T=2ms
 mpu.write(0x1b, 0xe0)
 mpu.write(0x1c, 0xf0)
 
-sleep(0.2)
+sleep(1)
 
 tests = mpu.readTestRegs()
-
+print "%X, %X, %X, %X, %X, %X"%tests
 gyro_t = mpu.readGyro()
 accel_t = mpu.readAccel()
 
-FTgx = 25*131*1.046**(tests[3]) if tests[3] else 0
-FTgy = -25*131*1.046**(tests[4]) if tests[4] else 0
-FTgz = 25*131*1.046**(tests[5]) if tests[5] else 0
+FTgx = 25*131*1.046**(tests[3]-1) if tests[3] else 0
+FTgy = -25*131*1.046**(tests[4]-1) if tests[4] else 0
+FTgz = 25*131*1.046**(tests[5]-1) if tests[5] else 0
 
-FTax = 4096*0.34*(0.92/0.34)**((tests[0]-1)/(2**5-2)) if tests[0] else 0
-FTay = 4096*0.34*(0.92/0.34)**((tests[1]-1)/(2**5-2)) if tests[1] else 0
-FTaz = 4096*0.34*(0.92/0.34)**((tests[2]-1)/(2**5-2)) if tests[2] else 0
+FTax = 4096*0.34*(0.92/0.34)**((tests[0]-1)/30.0) if tests[0] else 0
+FTay = 4096*0.34*(0.92/0.34)**((tests[1]-1)/30.0) if tests[1] else 0
+FTaz = 4096*0.34*(0.92/0.34)**((tests[2]-1)/30.0) if tests[2] else 0
 
 print "FTg: ", (FTgx, FTgy, FTgz)
 print "FTa: ", (FTax, FTay, FTaz)
 
-mpu.write(0x1b, 0xe0 & 0x00)
-mpu.write(0x1c, 0xf0 & 0x80)
+mpu.write(0x1b, 0x00)
+mpu.write(0x1c, 0x80)
 
-sleep(0.2)
+sleep(1)
 
 gyro = mpu.readGyro()
+print gyro
 accel = mpu.readAccel()
 
 STRgx = gyro_t[0] - gyro[0]
@@ -112,6 +134,21 @@ print "Change from FT gz: ", (STRgz-FTgz)/FTgz
 print "Change from FT ax: ", (STRax-FTax)/FTax
 print "Change from FT ay: ", (STRay-FTay)/FTay
 print "Change from FT az: ", (STRaz-FTaz)/FTaz
+
+"""
+x-axis self test: acceleration trim within : 0.7% of factory value
+y-axis self test: acceleration trim within : 0.7% of factory value
+z-axis self test: acceleration trim within : 0.8% of factory value
+x-axis self test: gyration trim within : 0.2% of factory value
+y-axis self test: gyration trim within : -0.2% of factory value
+z-axis self test: gyration trim within : 0.3% of factory value
+FT[i] 2216.07
+FT[i] 2216.07
+FT[i] 2530.60
+FT[i] 5876.56
+FT[i] -5618.13
+FT[i] 6725.40
+"""
 
 #mpu.read(0x0d)
 #mpu.read(0x0e)

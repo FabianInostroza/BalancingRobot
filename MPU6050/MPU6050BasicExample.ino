@@ -27,15 +27,6 @@
  
 #include "SPI.h"
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include "ILI9341_t3.h"
-
-// For the Adafruit shield, these are the default.
-#define TFT_DC 9
-#define TFT_CS 10
-
-// Use hardware SPI (on Uno, #13, #12, #11) and the above for CS/DC
-ILI9341_t3 tft = ILI9341_t3(TFT_CS, TFT_DC);
 
 // Define registers per MPU6050, Register Map and Descriptions, Rev 4.2, 08/19/2013 6 DOF Motion sensor fusion device
 // Invensense Inc., www.invensense.com
@@ -187,7 +178,7 @@ int Ascale = AFS_2G;
 float aRes, gRes; // scale resolutions per LSB for the sensors
   
 // Pin definitions
-int intPin = 12;  // This can be changed, 2 and 3 are the Arduinos ext int pins
+int intPin = 2;  // This can be changed, 2 and 3 are the Arduinos ext int pins
 
 int16_t accelCount[3];           // Stores the 16-bit signed accelerometer sensor output
 float ax, ay, az;                // Stores the real accel value in g's
@@ -207,38 +198,10 @@ void setup()
   // Set up the interrupt pin, its set as active high, push-pull
   pinMode(intPin, INPUT);
   digitalWrite(intPin, LOW);
-  
-  tft.begin();         // Initialize the display
- // tft.setContrast(58); // Set the contrast
-  tft.setRotation(2);  //  0 or 2) width = width, 1 or 3) width = height, swapped etc.
-
-  
-// Start device display with ID of sensor
-  tft.fillScreen(ILI9341_WHITE);
-  tft.setTextColor(ILI9341_BLACK); // Set pixel color; 1 on the monochrome screen
-  tft.setTextSize(2);
-  tft.setCursor(40,0); tft.print("MPU6050");
-  //tft.setTextSize(1);
-  tft.setCursor(0, 40); tft.print("6-DOF 16-bit");
-  tft.setCursor(0, 60); tft.print("motion sensor");
-  tft.setCursor(40,80); tft.print("60 ug LSB");
-//   
-  delay(1000);
-
-// Set up for data display
-
-  tft.fillScreen(ILI9341_WHITE);      // clears the screen and buffer
-  tft.setCursor(20,0); tft.print("   6050");
+ 
 
   // Read the WHO_AM_I register, this is a good test of communication
   uint8_t c = readByte(MPU6050_ADDRESS, WHO_AM_I_MPU6050);  // Read WHO_AM_I register for MPU-6050
-  tft.setCursor(20,0); tft.print("MPU6050");
-  tft.setCursor(0,20); tft.print("I AM");
-  tft.setCursor(0,40); tft.print(c, HEX);  
-  tft.setCursor(0,60); tft.print("I Should Be");
-  tft.setCursor(0,80); tft.print(0x68, HEX); 
-//   
-  delay(1000); 
 
   if (c == 0x68) // WHO_AM_I should always be 0x68
   {  
@@ -253,15 +216,12 @@ void setup()
     Serial.print("z-axis self test: gyration trim within : "); Serial.print(SelfTest[5],1); Serial.println("% of factory value");
 
     if(SelfTest[0] < 1.0f && SelfTest[1] < 1.0f && SelfTest[2] < 1.0f && SelfTest[3] < 1.0f && SelfTest[4] < 1.0f && SelfTest[5] < 1.0f) {
-//    tft.clearDisplay();
-    tft.setCursor(0, 120); tft.print("Pass Selftest!");  
 //     
     delay(1000);
   
     calibrateMPU6050(gyroBias, accelBias); // Calibrate gyro and accelerometers, load biases in bias registers  
     initMPU6050(); Serial.println("MPU6050 initialized for active data mode...."); // Initialize device for active mode read of acclerometer, gyroscope, and temperature
 //  tft.fillScreen(ILI9341_WHITE);
-    tft.setTextSize(2);
    }
    else
    {
@@ -314,24 +274,6 @@ void loop()
    // Print temperature in degrees Centigrade      
     Serial.print("Temperature is ");  Serial.print(temperature, 2);  Serial.println(" degrees C"); // Print T values to tenths of s degree C
     Serial.println("");
-      
-  tft.fillScreen(ILI9341_WHITE);
-  
-    tft.setCursor(24, 5); tft.print("MPU6050");
-    tft.setCursor(0, 25); tft.print(" x   y    z  ");
-
-    tft.setCursor(0,  45); tft.print((int16_t)(1000*ax)); 
-    tft.setCursor(60, 45); tft.print((int16_t)(1000*ay)); 
-    tft.setCursor(120, 45); tft.print((int16_t)(1000*az)); 
-    tft.setCursor(192, 45); tft.print("mg");
-    
-    tft.setCursor(0,  65); tft.print((int16_t)(gx)); 
-    tft.setCursor(60, 65); tft.print((int16_t)(gy)); 
-    tft.setCursor(120, 65); tft.print((int16_t)(gz)); 
-    tft.setCursor(192, 65); tft.print("o/s");     
-   
-    tft.setCursor(0,  95); tft.print("Gyro Temp = "); 
-    tft.setCursor(160, 95); tft.print(temperature, 1); tft.print(" C");
 //     
     
     count = millis();
@@ -346,8 +288,8 @@ void loop()
 void getGres() {
   switch (Gscale)
   {
- 	// Possible gyro scales (and their register bit settings) are:
-	// 250 DPS (00), 500 DPS (01), 1000 DPS (10), and 2000 DPS  (11). 
+  // Possible gyro scales (and their register bit settings) are:
+  // 250 DPS (00), 500 DPS (01), 1000 DPS (10), and 2000 DPS  (11). 
     case GFS_250DPS:
           gRes = 250.0/32768.0;
           break;
@@ -366,8 +308,8 @@ void getGres() {
 void getAres() {
   switch (Ascale)
   {
- 	// Possible accelerometer scales (and their register bit settings) are:
-	// 2 Gs (00), 4 Gs (01), 8 Gs (10), and 16 Gs  (11). 
+  // Possible accelerometer scales (and their register bit settings) are:
+  // 2 Gs (00), 4 Gs (01), 8 Gs (10), and 16 Gs  (11). 
     case AFS_2G:
           aRes = 2.0/32768.0;
           break;
@@ -698,30 +640,30 @@ void MPU6050SelfTest(float * destination) // Should return percent deviation fro
 
   void writeByte(uint8_t address, uint8_t subAddress, uint8_t data)
 {
-	Wire.beginTransmission(address);  // Initialize the Tx buffer
-	Wire.write(subAddress);           // Put slave register address in Tx buffer
-	Wire.write(data);                 // Put data in Tx buffer
-	Wire.endTransmission();           // Send the Tx buffer
+  Wire.beginTransmission(address);  // Initialize the Tx buffer
+  Wire.write(subAddress);           // Put slave register address in Tx buffer
+  Wire.write(data);                 // Put data in Tx buffer
+  Wire.endTransmission();           // Send the Tx buffer
 }
 
   uint8_t readByte(uint8_t address, uint8_t subAddress)
 {
-	uint8_t data; // `data` will store the register data	 
-	Wire.beginTransmission(address);         // Initialize the Tx buffer
-	Wire.write(subAddress);	                 // Put slave register address in Tx buffer
-	Wire.endTransmission(false);             // Send the Tx buffer, but send a restart to keep connection alive
-	Wire.requestFrom(address, (uint8_t) 1);  // Read one byte from slave register address 
-	data = Wire.read();                      // Fill Rx buffer with result
-	return data;                             // Return data read from slave register
+  uint8_t data; // `data` will store the register data   
+  Wire.beginTransmission(address);         // Initialize the Tx buffer
+  Wire.write(subAddress);                  // Put slave register address in Tx buffer
+  Wire.endTransmission(false);             // Send the Tx buffer, but send a restart to keep connection alive
+  Wire.requestFrom(address, (uint8_t) 1);  // Read one byte from slave register address 
+  data = Wire.read();                      // Fill Rx buffer with result
+  return data;                             // Return data read from slave register
 }
 
   void readBytes(uint8_t address, uint8_t subAddress, uint8_t count, uint8_t * dest)
 {  
-	Wire.beginTransmission(address);   // Initialize the Tx buffer
-	Wire.write(subAddress);            // Put slave register address in Tx buffer
-	Wire.endTransmission(false);       // Send the Tx buffer, but send a restart to keep connection alive
-	uint8_t i = 0;
+  Wire.beginTransmission(address);   // Initialize the Tx buffer
+  Wire.write(subAddress);            // Put slave register address in Tx buffer
+  Wire.endTransmission(false);       // Send the Tx buffer, but send a restart to keep connection alive
+  uint8_t i = 0;
         Wire.requestFrom(address, count);  // Read bytes from slave register address 
-	while (Wire.available()) {
+  while (Wire.available()) {
         dest[i++] = Wire.read(); }         // Put read results in the Rx buffer
 }

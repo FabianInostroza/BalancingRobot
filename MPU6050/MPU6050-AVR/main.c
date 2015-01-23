@@ -112,7 +112,7 @@ int main(void)
     UART0_enRxInt(1);
 
     EICRA = (1 << ISC21); // interrupcion INT2 falling edge
-    EIMSK = (0 << INT2); // activar interrupcion INT2
+    EIMSK = (1 << INT2); // activar interrupcion INT2
 
     sei();
     err = setupMPU6050(0x68);
