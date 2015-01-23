@@ -106,7 +106,7 @@ void MainWindow::readData(QByteArray d)
 {
     double time = datetime->currentDateTime().toMSecsSinceEpoch()/1000.0;
     static double last_time;
-    QList<QByteArray> list = d.split(':');
+    QList<QByteArray> list = d.split(';');
     bool ok;
     //qDebug()  << list;
     if (list.length() >= 6){

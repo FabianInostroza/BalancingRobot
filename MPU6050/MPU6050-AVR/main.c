@@ -102,16 +102,17 @@ ISR(USART0_RX_vect)
 int main(void)
 {
     char buf[20];
+    uint8_t i2c_buf[13];
     uint8_t err;
     uint8_t reg_val;
     DDRB = (1 << PIN0);
-    uint8_t tmp, i;
+    uint8_t tmp=0, i;
 
     setupUART0(1, 1);
     UART0_enRxInt(1);
 
     EICRA = (1 << ISC21); // interrupcion INT2 falling edge
-    EIMSK = (1 << INT2); // activar interrupcion INT2
+    EIMSK = (0 << INT2); // activar interrupcion INT2
 
     sei();
     err = setupMPU6050(0x68);
@@ -161,12 +162,12 @@ int main(void)
             }else{
                 PORTB &= ~(1 << PIN0);
             }
-            if( mpu6050_burstRead(0x68, MPU6050_RA_FIFO_R_W, buf, 12) )
+            if( mpu6050_burstRead(0x68, MPU6050_RA_FIFO_R_W, i2c_buf, 12) )
                 UART0_sends("error\n");
             for (i = 0; i < 12; i+=2){
-                UART0_send_hex8(buf[i]);
-                UART0_send_hex8(buf[i+1]);
-                UART0_Tx(':');
+                UART0_send_hex8(i2c_buf[i]);
+                UART0_send_hex8(i2c_buf[i+1]);
+                UART0_Tx(';');
             }
             UART0_Tx('\n');
         }
