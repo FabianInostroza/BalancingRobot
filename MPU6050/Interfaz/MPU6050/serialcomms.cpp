@@ -1,84 +1,104 @@
-#include "serialreaderwriter.h"
+#include "serialcomms.h"
 #include <QDebug>
 
-SerialReaderWriter::SerialReaderWriter(QObject *parent) :
+SerialComms::SerialComms(QObject *parent) :
     QObject(parent)
 {
     nStop = 1;
 }
 
-SerialReaderWriter::SerialReaderWriter(QString sp, qint32 baud, QObject *parent) :
+SerialComms::SerialComms(QString sp, qint32 baud, QObject *parent) :
     QObject(parent)
 {
     portName = QString(sp);
     baudRate = baud;
-    this->m_serialPort = new QSerialPort();
-    this->m_serialPort->setPortName(this->portName);
-    this->m_serialPort->setBaudRate(this->baudRate);
-    this->m_serialPort->open(QIODevice::ReadWrite);
-    connect(this->m_serialPort, SIGNAL(readyRead()), this, SLOT(readLine()));
+    //this->m_serialPort = new QSerialPort();
+    //this->m_serialPort->setPortName(this->portName);
+    //this->m_serialPort->setBaudRate(this->baudRate);
+
+    this->portName = sp;
+    this->baudRate = baud;
+
+    //this->m_serialPort->open(QIODevice::ReadWrite);
+    //connect(this->m_serialPort, SIGNAL(readyRead()), this, SLOT(readLine()));
     nStop = 1;
 }
 
-void SerialReaderWriter::setPortName(QString portName)
+void SerialComms::setPortName(QString portName)
 {
     //this->m_serialPort.setPortName(portName);
     this->portName = portName;
 }
 
-int SerialReaderWriter::open(QString portName, qint32 baud)
+int SerialComms::open(QString portName, qint32 baud)
 {
     baudRate = baud;
     this->portName = portName;
     //return this->m_serialPort.open(QIODevice::ReadWrite);
 }
 
-int SerialReaderWriter::open()
+int SerialComms::open()
 {
     return this->m_serialPort->open(QIODevice::ReadWrite);
 }
 
-void SerialReaderWriter::readData()
+void SerialComms::readData()
 {
-//    while( this->m_serialPort.canReadLine() ){
-//        emit dataReady(this->m_serialPort.readLine());
+    while( this->m_serialPort->canReadLine() ){
+        emit dataReady(new QByteArray(this->m_serialPort->readLine()));
+    }
+
+//    this->m_serialPort = new QSerialPort();
+//    this->m_serialPort->setPortName(this->portName);
+//    this->m_serialPort->setBaudRate(this->baudRate);
+
+//    if (this->m_serialPort->open(QIODevice::ReadWrite)){
+//        while(nStop){
+//            if(this->m_serialPort->canReadLine()){
+//                QByteArray data = this->m_serialPort->readLine();
+//                emit dataReady(new QByteArray(data));
+//            }
+//        }
 //    }
+
+
+    //qDebug("chao2");
+    //delete this->m_serialPort;
+    //emit finished();
+}
+
+void SerialComms::start()
+{
     this->m_serialPort = new QSerialPort();
     this->m_serialPort->setPortName(this->portName);
     this->m_serialPort->setBaudRate(this->baudRate);
-    qDebug() << portName;
-    qDebug() << baudRate;
-    if (this->m_serialPort->open(QIODevice::ReadWrite)){
-        while(nStop){
-            if(this->m_serialPort->canReadLine()){
-                qDebug() << "ada";
-                QByteArray data = this->m_serialPort->readLine();
-                emit dataReady(data);
-//                qDebug() <<  << endl;
-            }
-        }
+    this->m_serialPort->setFlowControl(QSerialPort::NoFlowControl);
+    if (this->m_serialPort->open(QIODevice::ReadWrite)) {
+        this->m_serialPort->flush();
+        connect(this->m_serialPort, SIGNAL(readyRead()), SLOT(readData()));
     }
-    qDebug("chao2");
-    delete this->m_serialPort;
-    emit finished();
+//    if (this->m_serialPort->open(QIODevice::ReadWrite)){
+//        while(this->nStop){
+//            if( this->m_serialPort->canReadLine()){
+//                QByteArray * data = new QByteArray(this->m_serialPort->readLine());
+//                emit dataReady(data);
+//            }
+//        }
+//    }
 }
 
-void SerialReaderWriter::start()
+void SerialComms::stop()
 {
-    connect(this->m_serialPort, SIGNAL(readyRead()), SLOT(readData()));
+    disconnect(this->m_serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
+    //nStop = 0;
 }
 
-void SerialReaderWriter::stop()
+void SerialComms::readLine()
 {
-    //disconnect(&this->m_serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
-    nStop = 0;
-}
 
-void SerialReaderWriter::readLine()
-{
     while(this->m_serialPort->canReadLine()){
         QByteArray data = this->m_serialPort->readLine();
-        emit dataReady(data);
+        emit dataReady(new QByteArray(data));
         //qDebug() << data << endl;
     }
 }

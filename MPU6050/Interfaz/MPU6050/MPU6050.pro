@@ -15,11 +15,11 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     qcustomplot.cpp \
-    serialreaderwriter.cpp
+    serialcomms.cpp
 
 HEADERS  += mainwindow.h \
     qcustomplot.h \
-    serialreaderwriter.h
+    serialcomms.h
 
 INCLUDEPATH += ../qtserialport-build/include
 LIBS += -L../qtserialport-build/src/serialport -lQtSerialPort

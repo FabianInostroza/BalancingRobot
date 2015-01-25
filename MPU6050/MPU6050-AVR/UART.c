@@ -76,6 +76,19 @@ void UART0_send_hex8(uint8_t d)
     UART0_send_hex(d);
 }
 
+void UART0_send_hex16(uint16_t d)
+{
+    UART0_send_hex(d >> 12);
+    UART0_send_hex(d >> 8);
+    UART0_send_hex(d >> 4);
+    UART0_send_hex(d);
+}
+
+void UART0_send_hex32(uint32_t d)
+{
+    UART0_send_hex16(d >> 16);
+    UART0_send_hex16(d);
+}
 
 void UART0_send_hex(uint8_t h)
 {

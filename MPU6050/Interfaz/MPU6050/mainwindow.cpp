@@ -13,11 +13,12 @@ MainWindow::MainWindow(QWidget *parent) :
     layout->addWidget(plot2, 1, 0);
 
     serial_thread = new QThread();
-    serialReader = new SerialReaderWriter("/dev/ttyUSB0", 115200);
+    serialReader = new SerialComms("/dev/ttyUSB0", 115200);
+    serialReader->moveToThread(serial_thread);
     connect(serialReader, SIGNAL(finished()), serial_thread, SLOT(quit()));
     //connect(serial_thread, SIGNAL(started()), serialReader, SLOT(readData()));
-    serialReader->moveToThread(serial_thread);
-    connect(serialReader, SIGNAL(dataReady(QByteArray)), this, SLOT(readData(QByteArray)));
+    connect(serial_thread, SIGNAL(started()), serialReader, SLOT(start()));
+    connect(serialReader, SIGNAL(dataReady(QByteArray*)), this, SLOT(readData(QByteArray*)));
     //connect(QCoreApplication.instance(),SIGNAL()
     serial_thread->start();
 
@@ -67,7 +68,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //plot->graph(0)->setAntialiasedFill(false);
     //plot->graph(0)->setData(xdata, ydata);
     //plot->xAxis->setRange(-1, 1);
-    plot2->yAxis->setRange(-500, 500);
+//    plot2->yAxis->setRange(-500, 500);
+    plot2->yAxis->setRange(-100, 100);
 
     plot2->xAxis->setTickLabelType(QCPAxis::ltDateTime);
     plot2->xAxis->setDateTimeFormat("hh:mm:ss");
@@ -102,13 +104,19 @@ void MainWindow::updatePlot()
     this->plot->replot();
 }
 
-void MainWindow::readData(QByteArray d)
+void MainWindow::readData(QByteArray * d)
 {
     double time = datetime->currentDateTime().toMSecsSinceEpoch()/1000.0;
     static double last_time;
-    QList<QByteArray> list = d.split(';');
+    static int init=0;
+    QList<QByteArray> list = d->split(';');
+    delete d;
     bool ok;
+    double tilt, tilt_f, tilt2;
+    static double ang;
+
     //qDebug()  << list;
+    //qDebug() << time - last_time;
     if (list.length() >= 6){
         float ax = ((int16_t)list[0].toInt(&ok, 16))/16384.0;
         float ay = ((int16_t)list[1].toInt(&ok, 16))/16384.0;
@@ -118,6 +126,29 @@ void MainWindow::readData(QByteArray d)
         float gy = ((int16_t)list[4].toInt(&ok, 16))/65.5;
         float gz = ((int16_t)list[5].toInt(&ok, 16))/65.5;
     //    qDebug() << ax;
+        // tan(x) = sin(x)/cos(x) -> tan(x) = 0 cuando x = 0
+        tilt = atan2f(ay, az)*180.0/M_PI;
+
+        if (init == 0){
+            ang = tilt;
+            tilt_f = tilt;
+            init = 1;
+        }else{
+            //ang = 0.3*ang+0.7*gx;
+            ang = ang + gx*1.0/200;
+            tilt_f = 0.3*tilt_f + 0.7*tilt;
+        }
+
+        //tilt2 = tilt_f + ang;
+        tilt2 = 0.8*(tilt2 + gx*1.0/200) + 0.2*tilt_f;
+        //qDebug() << tilt;
+        this->plot2->graph(0)->addData(time, tilt);
+        this->plot2->graph(0)->removeDataBefore(time-8);
+        this->plot2->graph(1)->addData(time, ang);
+        this->plot2->graph(1)->removeDataBefore(time-8);
+        this->plot2->graph(2)->addData(time, tilt2);
+        this->plot2->graph(2)->removeDataBefore(time-8);
+        /*
         this->plot->graph(0)->addData(time, ax);
         this->plot->graph(0)->removeDataBefore(time-8);
         this->plot->graph(1)->addData(time, ay);
@@ -132,7 +163,9 @@ void MainWindow::readData(QByteArray d)
         this->plot2->graph(1)->removeDataBefore(time-8);
         this->plot2->graph(2)->addData(time, gz);
         this->plot2->graph(2)->removeDataBefore(time-8);
+        */
         this->plot2->xAxis->setRange(time+0.25, 8, Qt::AlignRight);
+
         if( (time - last_time) > 0.05){
             this->plot->replot();
             this->plot2->replot();

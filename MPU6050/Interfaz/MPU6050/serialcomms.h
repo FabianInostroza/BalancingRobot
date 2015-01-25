@@ -1,26 +1,26 @@
-#ifndef SERIALREADERWRITER_H
-#define SERIALREADERWRITER_H
+#ifndef SERIALCOMMS_H
+#define SERIALCOMMS_H
 
 #include <QObject>
 #include <QtSerialPort/QSerialPort>
 
-class SerialReaderWriter : public QObject
+class SerialComms : public QObject
 {
     Q_OBJECT
 public:
-    explicit SerialReaderWriter(QObject *parent = 0);
-    explicit SerialReaderWriter(QString sp, qint32 baud, QObject *parent = 0);
+    explicit SerialComms(QObject *parent = 0);
+    explicit SerialComms(QString sp, qint32 baud, QObject *parent = 0);
     void setPortName(QString);
-    void start(void);
     int open(QString, qint32);
     int open();
 
-    void stop();
 signals:
-    void dataReady(QByteArray data);
+    void dataReady(QByteArray * data);
     void finished();
 
 public slots:
+    void stop();
+    void start(void);
 
 protected slots:
     void readLine();
@@ -35,4 +35,4 @@ private slots:
 
 };
 
-#endif // SERIALREADERWRITER_H
+#endif // SERIALCOMMS_H

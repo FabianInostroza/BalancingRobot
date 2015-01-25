@@ -58,3 +58,8 @@
 
 # ejecutables
 MPU6050/Interfaz/MPU6050/MPU6050
+
+#latex
+*.synctex.gz
+*.log
+*.aux

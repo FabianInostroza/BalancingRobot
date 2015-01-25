@@ -359,5 +359,9 @@ uint8_t setupMPU6050(uint8_t);
 uint8_t mpu6050_readReg(uint8_t, uint8_t, uint8_t *);
 uint8_t mpu6050_writeReg(uint8_t, uint8_t, uint8_t);
 uint8_t mpu6050_burstRead(uint8_t addr, uint8_t reg, uint8_t * data, uint8_t n);
+uint8_t mpu6050_burstWrite(uint8_t addr, uint8_t reg, uint8_t * data, uint8_t n);
+uint8_t mpu6050_setGyroOffsets(uint8_t addr, int16_t gx, int16_t gy, int16_t gz);
+uint8_t mpu6050_gyroCal(uint8_t addr);
+uint8_t mpu6050_readGyro(uint8_t addr, int16_t * gx, int16_t * gy, int16_t * gz);
 
 #endif // MPU6050_H_INCLUDED
