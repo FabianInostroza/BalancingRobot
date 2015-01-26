@@ -30,9 +30,9 @@ void SerialComms::setPortName(QString portName)
     this->portName = portName;
 }
 
-int SerialComms::open(QString portName, qint32 baud)
+void SerialComms::open(QString portName, qint32 baud)
 {
-    baudRate = baud;
+    this->baudRate = baud;
     this->portName = portName;
     //return this->m_serialPort.open(QIODevice::ReadWrite);
 }
@@ -75,7 +75,7 @@ void SerialComms::start()
     this->m_serialPort->setFlowControl(QSerialPort::NoFlowControl);
     if (this->m_serialPort->open(QIODevice::ReadWrite)) {
         this->m_serialPort->flush();
-        connect(this->m_serialPort, SIGNAL(readyRead()), SLOT(readData()));
+        connect(this->m_serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
     }
 //    if (this->m_serialPort->open(QIODevice::ReadWrite)){
 //        while(this->nStop){

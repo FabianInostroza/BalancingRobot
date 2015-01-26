@@ -1,0 +1,139 @@
+
+bin/Release/MotorDriver-AVR.elf:     formato del fichero elf32-avr
+
+Secciones:
+Ind Nombre        Tamaño    VMA       LMA       Desp fich Alin
+  0 .data         00000000  00800100  00000148  000001bc  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  1 .text         00000148  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .comment      00000011  00000000  00000000  000001bc  2**0
+                  CONTENTS, READONLY
+
+Desensamblado de la sección .text:
+
+00000000 <__vectors>:
+   0:	0c 94 46 00 	jmp	0x8c	; 0x8c <__ctors_end>
+   4:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+   8:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+   c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  10:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  14:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  18:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  1c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  20:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  24:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  28:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  2c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  30:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  34:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  38:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  3c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  40:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  44:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  48:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  4c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  50:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  54:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  58:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  5c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  60:	0c 94 52 00 	jmp	0xa4	; 0xa4 <__vector_24>
+  64:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  68:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  6c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  70:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  74:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  78:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  7c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  80:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  84:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  88:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+
+0000008c <__ctors_end>:
+  8c:	11 24       	eor	r1, r1
+  8e:	1f be       	out	0x3f, r1	; 63
+  90:	cf ef       	ldi	r28, 0xFF	; 255
+  92:	d0 e4       	ldi	r29, 0x40	; 64
+  94:	de bf       	out	0x3e, r29	; 62
+  96:	cd bf       	out	0x3d, r28	; 61
+  98:	0e 94 9c 00 	call	0x138	; 0x138 <main>
+  9c:	0c 94 a2 00 	jmp	0x144	; 0x144 <_exit>
+
+000000a0 <__bad_interrupt>:
+  a0:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+000000a4 <__vector_24>:
+  a4:	1f 92       	push	r1
+  a6:	0f 92       	push	r0
+  a8:	0f b6       	in	r0, 0x3f	; 63
+  aa:	0f 92       	push	r0
+  ac:	11 24       	eor	r1, r1
+  ae:	0b b6       	in	r0, 0x3b	; 59
+  b0:	0f 92       	push	r0
+  b2:	8f 93       	push	r24
+  b4:	9f 93       	push	r25
+  b6:	ef 93       	push	r30
+  b8:	ff 93       	push	r31
+  ba:	e8 e7       	ldi	r30, 0x78	; 120
+  bc:	f0 e0       	ldi	r31, 0x00	; 0
+  be:	80 81       	ld	r24, Z
+  c0:	91 81       	ldd	r25, Z+1	; 0x01
+  c2:	90 93 89 00 	sts	0x0089, r25
+  c6:	80 93 88 00 	sts	0x0088, r24
+  ca:	80 81       	ld	r24, Z
+  cc:	91 81       	ldd	r25, Z+1	; 0x01
+  ce:	90 93 8b 00 	sts	0x008B, r25
+  d2:	80 93 8a 00 	sts	0x008A, r24
+  d6:	ff 91       	pop	r31
+  d8:	ef 91       	pop	r30
+  da:	9f 91       	pop	r25
+  dc:	8f 91       	pop	r24
+  de:	0f 90       	pop	r0
+  e0:	0b be       	out	0x3b, r0	; 59
+  e2:	0f 90       	pop	r0
+  e4:	0f be       	out	0x3f, r0	; 63
+  e6:	0f 90       	pop	r0
+  e8:	1f 90       	pop	r1
+  ea:	18 95       	reti
+
+000000ec <setup_adc>:
+  ec:	80 e4       	ldi	r24, 0x40	; 64
+  ee:	80 93 7c 00 	sts	0x007C, r24
+  f2:	10 92 7b 00 	sts	0x007B, r1
+  f6:	81 e0       	ldi	r24, 0x01	; 1
+  f8:	80 93 7e 00 	sts	0x007E, r24
+  fc:	8b ee       	ldi	r24, 0xEB	; 235
+  fe:	80 93 7a 00 	sts	0x007A, r24
+ 102:	08 95       	ret
+
+00000104 <setup_pwm>:
+ 104:	8a b1       	in	r24, 0x0a	; 10
+ 106:	80 63       	ori	r24, 0x30	; 48
+ 108:	8a b9       	out	0x0a, r24	; 10
+ 10a:	80 eb       	ldi	r24, 0xB0	; 176
+ 10c:	80 93 80 00 	sts	0x0080, r24
+ 110:	81 e1       	ldi	r24, 0x11	; 17
+ 112:	80 93 81 00 	sts	0x0081, r24
+ 116:	8f ef       	ldi	r24, 0xFF	; 255
+ 118:	93 e0       	ldi	r25, 0x03	; 3
+ 11a:	90 93 87 00 	sts	0x0087, r25
+ 11e:	80 93 86 00 	sts	0x0086, r24
+ 122:	80 e0       	ldi	r24, 0x00	; 0
+ 124:	92 e0       	ldi	r25, 0x02	; 2
+ 126:	90 93 89 00 	sts	0x0089, r25
+ 12a:	80 93 88 00 	sts	0x0088, r24
+ 12e:	90 93 8b 00 	sts	0x008B, r25
+ 132:	80 93 8a 00 	sts	0x008A, r24
+ 136:	08 95       	ret
+
+00000138 <main>:
+ 138:	0e 94 76 00 	call	0xec	; 0xec <setup_adc>
+ 13c:	0e 94 82 00 	call	0x104	; 0x104 <setup_pwm>
+ 140:	78 94       	sei
+ 142:	ff cf       	rjmp	.-2      	; 0x142 <main+0xa>
+
+00000144 <_exit>:
+ 144:	f8 94       	cli
+
+00000146 <__stop_program>:
+ 146:	ff cf       	rjmp	.-2      	; 0x146 <__stop_program>

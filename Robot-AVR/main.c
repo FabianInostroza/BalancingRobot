@@ -111,6 +111,12 @@ int main(void)
     uint8_t reg_val;
     DDRB = (1 << PIN0);
     uint8_t i;
+    const float alpha = 0.2;
+    const float t0 = 1.0/200.0;
+    const float beta = 0.02;
+    const float gyro_k = 1/65.5*t0;
+    float tilt_f = 0;
+    float tilt = 0, tilt_r = 0;
 
     setupUART0(1, 1);
     UART0_enRxInt(1);
@@ -175,12 +181,18 @@ int main(void)
 //            }
 //            UART0_Tx('\n');
 
-            for (i = 0; i < 6; i++){
-                UART0_send_hex16(mpu_buf[i]);
-                UART0_Tx(';');
-            }
-            UART0_Tx('\n');
+//            for (i = 0; i < 6; i++){
+//                UART0_send_hex16(mpu_buf[i]);
+//                UART0_Tx(';');
+//            }
+//            UART0_Tx('\n');
 
+            tilt_r = atan2f(mpu_buf[1], mpu_buf[2])*180/M_PI;
+            tilt_f = (1-alpha)*tilt_f + alpha*tilt_r;
+
+            tilt = (1-beta)*(tilt + mpu_buf[3]*gyro_k) + beta*tilt_f;
+            sprintf(buf, "%.2f\n", tilt);
+            UART0_sends(buf);
         }
     }
 

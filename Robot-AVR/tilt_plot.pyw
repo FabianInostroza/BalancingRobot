@@ -108,7 +108,7 @@ class Plot(pg.PlotWidget):
             self.setXRange(0,l)    
 
 class COMM(QtCore.QThread):
-    updateData = QtCore.pyqtSignal([list])
+    updateData = QtCore.pyqtSignal([str])
     def __init__(self, **kwargs):
         super(COMM, self).__init__(**kwargs)
         self._lock = QtCore.QReadWriteLock()
@@ -139,9 +139,7 @@ class COMM(QtCore.QThread):
                 #print msg
                 msg = msg.strip('\n')
                 msg = msg.strip('\r')
-                d = msg.split(';')
-                if len(d) >= 6:
-                    self.updateData.emit(d)
+                self.updateData.emit(msg)
 
             if self._stop:
                 break
@@ -178,27 +176,10 @@ class MainWindow(QtGui.QWidget):
 
         self.time = QtCore.QTime()
 
-        self.plotAx = Plot(title='ax')
-        self.plotAx.setYRange(-2, 2)
-        self.plotAy = Plot(title='ay')
-        self.plotAy.setYRange(-2, 2)
-        self.plotAz = Plot(title='az')
-        self.plotAz.setYRange(-2, 2)
-        
-        self.plotGx = Plot(title='gx')
-        self.plotGx.setYRange(-250, 250)
-        self.plotGy = Plot(title='gy')
-        self.plotGy.setYRange(-250, 250)
-        self.plotGz = Plot(title='gz')
-        self.plotGz.setYRange(-250, 250)
+        self.plotTilt = Plot(title='Tilt')
+        self.plotTilt.setYRange(-90, 90)
 
-        self._layout.addWidget(self.plotAx, 0, 0)
-        self._layout.addWidget(self.plotAy, 1, 0)
-        self._layout.addWidget(self.plotAz, 2, 0)
-
-        self._layout.addWidget(self.plotGx, 0, 1)
-        self._layout.addWidget(self.plotGy, 1, 1)
-        self._layout.addWidget(self.plotGz, 2, 1)
+        self._layout.addWidget(self.plotTilt, 0, 0)
 
         self.setLayout(self._layout)
         self._sample_cnt = 0
@@ -207,33 +188,14 @@ class MainWindow(QtGui.QWidget):
     def updatePlot(self, d):
         time = self.time.elapsed()
         try:
-            ax = int(d[0],16)
-            ay = int(d[1],16)
-            az = int(d[2],16)
-            gx = int(d[3],16)
-            gy = int(d[4],16)
-            gz = int(d[5],16)
-
-            ax = (ax-(ax&0x8000)*2)/16384.0
-            ay = (ay-(ay&0x8000)*2)/16384.0
-            az = (az-(az&0x8000)*2)/16384.0
-
-            gx = (gx-(gx&0x8000)*2)/65.5
-            gy = (gy-(gy&0x8000)*2)/65.5
-            gz = (gz-(gz&0x8000)*2)/65.5
+            tilt = float(d)
 
             if (time - self._lastTime) >= 80:
                 upd = True
                 self._lastTime = time
             else:
                 upd = False
-            self.plotAx.updatePlot(time, ax, upd = upd)
-            self.plotAy.updatePlot(time, ay, upd = upd)
-            self.plotAz.updatePlot(time, az, upd = upd)
-
-            self.plotGx.updatePlot(time, gx, upd = upd)
-            self.plotGy.updatePlot(time, gy, upd = upd)
-            self.plotGz.updatePlot(time, gz, upd = upd)
+            self.plotTilt.updatePlot(time, tilt, upd = upd)
         except:
             print "error"
 

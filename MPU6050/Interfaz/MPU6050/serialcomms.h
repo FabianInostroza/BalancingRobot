@@ -11,7 +11,7 @@ public:
     explicit SerialComms(QObject *parent = 0);
     explicit SerialComms(QString sp, qint32 baud, QObject *parent = 0);
     void setPortName(QString);
-    int open(QString, qint32);
+    void open(QString, qint32);
     int open();
 
 signals:
