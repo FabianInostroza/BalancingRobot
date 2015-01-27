@@ -12,6 +12,7 @@ sens = [16384.0]*3 + [65.5]*3
 with serial.Serial('/dev/ttyUSB0', 115200) as ser:
     with open('data.csv','w') as f:
         ser.flush()
+        f.write('ax;ay;az;gx;gy;gz\r\n')
         while True:
             line = ser.readline()
             line = line.strip('\x00')

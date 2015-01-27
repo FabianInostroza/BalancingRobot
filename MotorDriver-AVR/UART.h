@@ -11,7 +11,7 @@ void UART0_sends(char * s);
 void UART0_send_hex8(uint8_t);
 void UART0_send_hex16(uint16_t);
 void UART0_send_hex32(uint32_t d);
-inline void UART0_send_hex(uint8_t);
+void UART0_send_hex(uint8_t);
 
 
 #endif // UART_H_INCLUDED

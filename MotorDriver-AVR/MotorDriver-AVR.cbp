@@ -49,6 +49,11 @@
 			<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).eep" />
 			<Add after="avr-nm $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).map2" />
 		</ExtraCommands>
+		<Unit filename="UART.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="UART.h" />
+		<Unit filename="UART_config.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>

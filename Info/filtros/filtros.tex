@@ -135,27 +135,27 @@
          % otherwise the current date is printed 
 
 
-%\usepackage{hyperref}
-%\hypersetup{
-%%    bookmarks=true,         % show bookmarks bar?
-%    unicode=false,          % non-Latin characters in Acrobat’s bookmarks
-%%    pdftoolbar=true,        % show Acrobat’s toolbar?
-%%    pdfmenubar=true,        % show Acrobat’s menu?
-%    pdffitwindow=false,     % window fit to page when opened
-%    pdfstartview={FitH},    % fits the width of the page to the window
-%    pdftitle={Cinemática inversa de la plataforma Stewart},    % title
-%    pdfauthor={Fabián Inostroza},     % author
-%%    pdfsubject={Subject},   % subject of the document
-%%    pdfcreator={Creator},   % creator of the document
-%%    pdfproducer={Producer}, % producer of the document
-%%    pdfkeywords={keyword1} {key2} {key3}, % list of keywords
-%    pdfnewwindow=true,      % links in new window
-%    colorlinks=true,       % false: boxed links; true: colored links
-%    linkcolor=blue,          % color of internal links (change box color with linkbordercolor)
-%    citecolor=green,        % color of links to bibliography
-%    filecolor=magenta,      % color of file links
-%    urlcolor=cyan           % color of external links
-%}
+\usepackage{hyperref}
+\hypersetup{
+%    bookmarks=true,         % show bookmarks bar?
+    unicode=false,          % non-Latin characters in Acrobat’s bookmarks
+%    pdftoolbar=true,        % show Acrobat’s toolbar?
+%    pdfmenubar=true,        % show Acrobat’s menu?
+    pdffitwindow=false,     % window fit to page when opened
+    pdfstartview={FitH},    % fits the width of the page to the window
+    pdftitle={Filtros},    % title
+    pdfauthor={Fabián Inostroza},     % author
+%    pdfsubject={Subject},   % subject of the document
+%    pdfcreator={Creator},   % creator of the document
+%    pdfproducer={Producer}, % producer of the document
+%    pdfkeywords={keyword1} {key2} {key3}, % list of keywords
+    pdfnewwindow=true,      % links in new window
+    colorlinks=true,       % false: boxed links; true: colored links
+    linkcolor=blue,          % color of internal links (change box color with linkbordercolor)
+    citecolor=green,        % color of links to bibliography
+    filecolor=magenta,      % color of file links
+    urlcolor=cyan           % color of external links
+}
 
 \begin{document}
 \maketitle
@@ -278,5 +278,13 @@ Aplicando transformada Z inversa
 				+ \frac{\omega_c}{1/T_0 + \omega_c} \theta_m(k)  \\
 				&= (1-\alpha)[\theta_e(k-1) + T_0 \dot{\theta}_m(k) ] + \alpha \theta_m(k)
 \end{align*}
+
+Resultado de aplicar el filtro complementario
+\begin{figure}[h!tb]
+\centering
+\includegraphics[width=0.9\linewidth]{tilt}
+\caption{Ángulo de inclinación usando filtro complementario.}
+\label{fig:comp_filt}
+\end{figure}
 
 \end{document}

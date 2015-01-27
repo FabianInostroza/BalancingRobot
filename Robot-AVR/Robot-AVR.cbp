@@ -74,6 +74,10 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="pwm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pwm.h" />
 		<Unit filename="twi.c">
 			<Option compilerVar="CC" />
 		</Unit>

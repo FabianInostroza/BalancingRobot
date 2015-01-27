@@ -2,6 +2,8 @@ Se incluyó el miembro del archivo debido al fichero (símbolo)
 
 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
                               /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o (exit)
+/usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+                              obj/Release/main.o (__do_clear_bss)
 
 Configuración de la Memoria
 
@@ -21,6 +23,7 @@ La dirección de la sección .data se estableció a 0x800100
 LOAD /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
 LOAD obj/Release/main.o
 LOAD obj/Release/pwm.o
+LOAD obj/Release/UART.o
 LOAD /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a
 LOAD /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/libm.a
 START GROUP
@@ -119,7 +122,7 @@ END GROUP
 .rela.plt
  *(.rela.plt)
 
-.text           0x0000000000000000      0x148
+.text           0x0000000000000000      0x3e8
  *(.vectors)
  .vectors       0x0000000000000000       0x8c /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
                 0x0000000000000000                __vectors
@@ -158,6 +161,8 @@ END GROUP
  *(.init3)
  *(.init3)
  *(.init4)
+ .init4         0x0000000000000098       0x10 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+                0x0000000000000098                __do_clear_bss
  *(.init4)
  *(.init5)
  *(.init5)
@@ -168,72 +173,96 @@ END GROUP
  *(.init8)
  *(.init8)
  *(.init9)
- .init9         0x0000000000000098        0x8 /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
+ .init9         0x00000000000000a8        0x8 /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
  *(.init9)
  *(.text)
- .text          0x00000000000000a0        0x4 /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
-                0x00000000000000a0                __vector_22
-                0x00000000000000a0                __vector_28
-                0x00000000000000a0                __vector_1
-                0x00000000000000a0                __vector_32
-                0x00000000000000a0                __vector_34
-                0x00000000000000a0                __vector_12
-                0x00000000000000a0                __bad_interrupt
-                0x00000000000000a0                __vector_6
-                0x00000000000000a0                __vector_31
-                0x00000000000000a0                __vector_3
-                0x00000000000000a0                __vector_23
-                0x00000000000000a0                __vector_30
-                0x00000000000000a0                __vector_25
-                0x00000000000000a0                __vector_11
-                0x00000000000000a0                __vector_13
-                0x00000000000000a0                __vector_17
-                0x00000000000000a0                __vector_19
-                0x00000000000000a0                __vector_7
-                0x00000000000000a0                __vector_27
-                0x00000000000000a0                __vector_5
-                0x00000000000000a0                __vector_33
-                0x00000000000000a0                __vector_4
-                0x00000000000000a0                __vector_9
-                0x00000000000000a0                __vector_2
-                0x00000000000000a0                __vector_21
-                0x00000000000000a0                __vector_15
-                0x00000000000000a0                __vector_29
-                0x00000000000000a0                __vector_8
-                0x00000000000000a0                __vector_26
-                0x00000000000000a0                __vector_14
-                0x00000000000000a0                __vector_10
-                0x00000000000000a0                __vector_16
-                0x00000000000000a0                __vector_18
-                0x00000000000000a0                __vector_20
- .text          0x00000000000000a4       0x60 obj/Release/main.o
-                0x00000000000000a4                __vector_24
-                0x00000000000000ec                setup_adc
- .text          0x0000000000000104       0x34 obj/Release/pwm.o
-                0x0000000000000104                setup_pwm
- .text          0x0000000000000138        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
-                0x0000000000000138                . = ALIGN (0x2)
+ .text          0x00000000000000b0        0x4 /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
+                0x00000000000000b0                __vector_22
+                0x00000000000000b0                __vector_28
+                0x00000000000000b0                __vector_1
+                0x00000000000000b0                __vector_32
+                0x00000000000000b0                __vector_34
+                0x00000000000000b0                __vector_12
+                0x00000000000000b0                __bad_interrupt
+                0x00000000000000b0                __vector_6
+                0x00000000000000b0                __vector_31
+                0x00000000000000b0                __vector_3
+                0x00000000000000b0                __vector_23
+                0x00000000000000b0                __vector_30
+                0x00000000000000b0                __vector_25
+                0x00000000000000b0                __vector_11
+                0x00000000000000b0                __vector_13
+                0x00000000000000b0                __vector_17
+                0x00000000000000b0                __vector_19
+                0x00000000000000b0                __vector_7
+                0x00000000000000b0                __vector_27
+                0x00000000000000b0                __vector_5
+                0x00000000000000b0                __vector_33
+                0x00000000000000b0                __vector_4
+                0x00000000000000b0                __vector_9
+                0x00000000000000b0                __vector_2
+                0x00000000000000b0                __vector_21
+                0x00000000000000b0                __vector_15
+                0x00000000000000b0                __vector_29
+                0x00000000000000b0                __vector_8
+                0x00000000000000b0                __vector_26
+                0x00000000000000b0                __vector_14
+                0x00000000000000b0                __vector_10
+                0x00000000000000b0                __vector_16
+                0x00000000000000b0                __vector_18
+ .text          0x00000000000000b4      0x18a obj/Release/main.o
+                0x00000000000000b4                __vector_24
+                0x00000000000000e8                __vector_20
+                0x0000000000000226                setup_adc
+ .text          0x000000000000023e       0x5a obj/Release/pwm.o
+                0x000000000000023e                setup_pwm
+ .text          0x0000000000000298      0x112 obj/Release/UART.o
+                0x0000000000000298                setupUART0
+                0x00000000000002e0                UART0_enRxInt
+                0x00000000000002f8                UART0_enTxInt
+                0x0000000000000310                UART0_Tx
+                0x000000000000031e                UART0_sends
+                0x0000000000000336                UART0_send_hex
+                0x0000000000000346                UART0_send_hex8
+                0x000000000000035a                UART0_send_hex16
+                0x000000000000038a                UART0_send_hex32
+ .text          0x00000000000003aa        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+ .text          0x00000000000003aa        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+                0x00000000000003aa                . = ALIGN (0x2)
  *(.text.*)
- .text.startup  0x0000000000000138        0xc obj/Release/main.o
-                0x0000000000000138                main
+ .text.startup  0x00000000000003aa       0x3a obj/Release/main.o
+                0x00000000000003aa                main
  .text.libgcc.mul
-                0x0000000000000144        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+                0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
  .text.libgcc.div
-                0x0000000000000144        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
- .text.libgcc   0x0000000000000144        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+                0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+ .text.libgcc   0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
  .text.libgcc.prologue
-                0x0000000000000144        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+                0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
  .text.libgcc.builtins
-                0x0000000000000144        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+                0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
  .text.libgcc.fmul
-                0x0000000000000144        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+                0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
  .text.libgcc.fixed
-                0x0000000000000144        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
-                0x0000000000000144                . = ALIGN (0x2)
+                0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+ .text.libgcc.mul
+                0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc.div
+                0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc   0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc.prologue
+                0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc.builtins
+                0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc.fmul
+                0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc.fixed
+                0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+                0x00000000000003e4                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x0000000000000144        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
-                0x0000000000000144                exit
-                0x0000000000000144                _exit
+ .fini9         0x00000000000003e4        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+                0x00000000000003e4                exit
+                0x00000000000003e4                _exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -252,17 +281,19 @@ END GROUP
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x0000000000000144        0x4 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+ .fini0         0x00000000000003e4        0x4 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
  *(.fini0)
-                0x0000000000000148                _etext = .
+                0x00000000000003e8                _etext = .
 
-.data           0x0000000000800100        0x0 dirección de carga 0x0000000000000148
+.data           0x0000000000800100        0x0 dirección de carga 0x00000000000003e8
                 0x0000000000800100                PROVIDE (__data_start, .)
  *(.data)
  .data          0x0000000000800100        0x0 /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
  .data          0x0000000000800100        0x0 obj/Release/main.o
  .data          0x0000000000800100        0x0 obj/Release/pwm.o
+ .data          0x0000000000800100        0x0 obj/Release/UART.o
  .data          0x0000000000800100        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+ .data          0x0000000000800100        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
  *(.data*)
  *(.rodata)
  *(.rodata*)
@@ -271,25 +302,27 @@ END GROUP
                 0x0000000000800100                _edata = .
                 0x0000000000800100                PROVIDE (__data_end, .)
 
-.bss            0x0000000000800100        0x0
+.bss            0x0000000000800100        0x4
                 0x0000000000800100                PROVIDE (__bss_start, .)
  *(.bss)
  .bss           0x0000000000800100        0x0 /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
- .bss           0x0000000000800100        0x0 obj/Release/main.o
- .bss           0x0000000000800100        0x0 obj/Release/pwm.o
- .bss           0x0000000000800100        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+ .bss           0x0000000000800100        0x4 obj/Release/main.o
+ .bss           0x0000000000800104        0x0 obj/Release/pwm.o
+ .bss           0x0000000000800104        0x0 obj/Release/UART.o
+ .bss           0x0000000000800104        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_exit.o)
+ .bss           0x0000000000800104        0x0 /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
  *(.bss*)
  *(COMMON)
-                0x0000000000800100                PROVIDE (__bss_end, .)
-                0x0000000000000148                __data_load_start = LOADADDR (.data)
-                0x0000000000000148                __data_load_end = (__data_load_start + SIZEOF (.data))
+                0x0000000000800104                PROVIDE (__bss_end, .)
+                0x00000000000003e8                __data_load_start = LOADADDR (.data)
+                0x00000000000003e8                __data_load_end = (__data_load_start + SIZEOF (.data))
 
-.noinit         0x0000000000800100        0x0
-                0x0000000000800100                PROVIDE (__noinit_start, .)
+.noinit         0x0000000000800104        0x0
+                0x0000000000800104                PROVIDE (__noinit_start, .)
  *(.noinit*)
-                0x0000000000800100                PROVIDE (__noinit_end, .)
-                0x0000000000800100                _end = .
-                0x0000000000800100                PROVIDE (__heap_start, .)
+                0x0000000000800104                PROVIDE (__noinit_end, .)
+                0x0000000000800104                _end = .
+                0x0000000000800104                PROVIDE (__heap_start, .)
 
 .eeprom         0x0000000000810000        0x0
  *(.eeprom*)
@@ -333,6 +366,7 @@ END GROUP
  .comment       0x0000000000000000       0x11 obj/Release/main.o
                                          0x12 (tamaño antes de la relajación)
  .comment       0x0000000000000000       0x12 obj/Release/pwm.o
+ .comment       0x0000000000000000       0x12 obj/Release/UART.o
 
 .note.gnu.build-id
  *(.note.gnu.build-id)
@@ -402,7 +436,22 @@ LOAD linker stubs
 Tabla de Referencias Cruzadas
 
 Símbolo                                          Fichero
+UART0_Tx                                          obj/Release/UART.o
+                                                  obj/Release/main.o
+UART0_enRxInt                                     obj/Release/UART.o
+                                                  obj/Release/main.o
+UART0_enTxInt                                     obj/Release/UART.o
+UART0_send_hex                                    obj/Release/UART.o
+UART0_send_hex16                                  obj/Release/UART.o
+                                                  obj/Release/main.o
+UART0_send_hex32                                  obj/Release/UART.o
+UART0_send_hex8                                   obj/Release/UART.o
+UART0_sends                                       obj/Release/UART.o
 __bad_interrupt                                   /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
+__bss_end                                         /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+__bss_start                                       /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+__do_clear_bss                                    /usr/lib/gcc/avr/4.8.1/avr51/libgcc.a(_clear_bss.o)
+                                                  obj/Release/main.o
 __heap_end                                        /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
 __init                                            /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
 __stack                                           /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
@@ -418,7 +467,8 @@ __vector_17                                       /usr/lib/gcc/avr/4.8.1/../../.
 __vector_18                                       /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
 __vector_19                                       /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
 __vector_2                                        /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
-__vector_20                                       /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
+__vector_20                                       obj/Release/main.o
+                                                  /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
 __vector_21                                       /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
 __vector_22                                       /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
 __vector_23                                       /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
@@ -448,6 +498,8 @@ exit                                              /usr/lib/gcc/avr/4.8.1/avr51/l
                                                   /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
 main                                              obj/Release/main.o
                                                   /usr/lib/gcc/avr/4.8.1/../../../avr/lib/avr51/crtm1284p.o
+setupUART0                                        obj/Release/UART.o
+                                                  obj/Release/main.o
 setup_adc                                         obj/Release/main.o
 setup_pwm                                         obj/Release/pwm.o
                                                   obj/Release/main.o
