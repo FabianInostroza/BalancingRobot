@@ -4,16 +4,20 @@
 void setupTWI(void)
 {
     PRR0 &= ~(1 << PRTWI);
+    //TWSR |= (1 << TWPS1) | (1 << TWPS0); // preescaler=64
     //TWSR |= (1 << TWPS1); // preescaler=16
     //TWSR |= (1 << TWPS0); // preescaler=4
     TWSR &= 0x3; // preescaler=1
     // preescaler = 16
     //TWBR = 1; // Freq(SCL) = 16e6/(16+2*1*16)=333kHz
-    //TWBR = 2; // Freq(SCL) = 16e6/(16+2*2*16)=200kHz
-    //TWBR = 8; // Freq(SCL) = 16e6/(16+2*2*16)=200kHz
-    //TWBR = 48; // Freq(SCL) = 16e6/(16+2*2*16)=200kHz
+    TWBR = 2; // Freq(SCL) = 16e6/(16+2*2*16)=200kHz
+    //TWBR = 8; // Freq(SCL) = 16e6/(16+2*8*16)=58kHz
+    //TWBR = 48; // Freq(SCL) = 16e6/(16+2*48*16)=10kHz
     // preescaler = 1
-    TWBR = 13; // 380952 Hz
+    //TWBR = 13; // 380952 Hz
+    TWBR = (F_CPU/100000L-16L)/2;
+    //TWBR = (F_CPU/200000L-16L)/2;
+    //TWBR = (F_CPU/300000L-16L)/2;
 }
 
 uint8_t twi_start(uint8_t addr, uint8_t w)

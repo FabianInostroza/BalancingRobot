@@ -20,12 +20,13 @@ uint8_t setupMPU6050(uint8_t addr)
     //err = mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0);
     err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0x10);// +/- 1000 deg/s
     err |= mpu6050_gyroCal(addr);
-    //err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0x08);// +/-500 deg/s
+    err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0x08);// +/-500 deg/s
     // activar pruebas del acelerometro, rango = +/-8g
     //err = mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x80);
     err |= mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x0); // +/-2g
-    // activar fifo para giroscopio y acelerometro
-    err |= mpu6050_writeReg(addr, MPU6050_RA_FIFO_EN, 0x78);
+    // activar fifo para giroscopio x y acelerometro
+    //err |= mpu6050_writeReg(addr, MPU6050_RA_FIFO_EN, 0x78);
+    err |= mpu6050_writeReg(addr, MPU6050_RA_FIFO_EN, 0x48);
     // configuracion del pin de interrupcion
     // active high, push-pull, pulso de 50us, flag se borra en cualquier lectura
     err |= mpu6050_writeReg(addr, MPU6050_RA_INT_PIN_CFG, 0x10);
@@ -34,7 +35,10 @@ uint8_t setupMPU6050(uint8_t addr)
     err |= mpu6050_writeReg(addr, MPU6050_RA_INT_ENABLE, 0x01);
     err |= mpu6050_writeReg(addr, MPU6050_RA_USER_CTRL, 0x44);
     _delay_ms(2);
-    err |= mpu6050_writeReg(addr, MPU6050_RA_USER_CTRL, 0x44);
+    // activar fifo
+    //err |= mpu6050_writeReg(addr, MPU6050_RA_USER_CTRL, 0x44);
+    // fifo inactiva
+    err |= mpu6050_writeReg(addr, MPU6050_RA_USER_CTRL, 0x04);
     //err = mpu6050_setGyroOffsets(0x68, 45/2, 212/2, -2/2);
     return err;
     // agregar mas inicializacion
