@@ -7,7 +7,17 @@ def hex2int16(h):
     i = int(h, 16)
     return (i-(i&0x8000)*2)
 
-sens = [16384.0]*3 + [65.5]*3
+def int2hex16(i):
+    if (i < 0):
+        n = (1 << 16) + i
+    else:
+        n = i
+    return '%x'%n
+
+
+#sens = [16384.0]*3 + [65.5]*3
+#sens = [4096.0]*3 + [65.5]*3
+sens = [1]*6
 
 with serial.Serial('/dev/ttyUSB0', 115200) as ser:
     with open('data.csv','w') as f:

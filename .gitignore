@@ -44,6 +44,10 @@
 *.p1
 *.pre
 *.d
+*.hex
+*.lss
+*.map
+*.map2
 
 # codeblocks
 *.depend

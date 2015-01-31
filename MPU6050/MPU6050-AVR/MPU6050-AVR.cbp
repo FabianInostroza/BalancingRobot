@@ -32,10 +32,10 @@
 				</Linker>
 			</Target>
 			<Environment>
-				<Variable name="BAUD" value="38400" />
+				<Variable name="BAUD" value="115200" />
 				<Variable name="MCU" value="atmega1284p" />
 				<Variable name="PORT" value="/dev/ttyUSB0" />
-				<Variable name="PROGRAMMER" value="wiring" />
+				<Variable name="PROGRAMMER" value="arduino" />
 			</Environment>
 		</Build>
 		<Compiler>

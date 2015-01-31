@@ -129,7 +129,8 @@ void MainWindow::readData(QByteArray * d)
         float gz = ((int16_t)list[5].toInt(&ok, 16))/32.8; //65.5;
     //    qDebug() << ax;
         // tan(x) = sin(x)/cos(x) -> tan(x) = 0 cuando x = 0
-        tilt = atan2(ay, az)*180.0/M_PI;
+        //tilt = atan2(ay, az)*180.0/M_PI; // robot grande
+        tilt = atan2(az, ax)*180.0/M_PI; // robot chico
 
         if (init){
             ang = tilt;
@@ -143,7 +144,8 @@ void MainWindow::readData(QByteArray * d)
         }
 
         //tilt2 = tilt_f + ang;
-        tilt2 = 0.98*(tilt2 + gx*t0) + 0.02*tilt;
+        //tilt2 = 0.98*(tilt2 + gx*t0) + 0.02*tilt; // robot grande
+        tilt2 = 0.98*(tilt2 + gy*t0) + 0.02*tilt; // robot chico
         //qDebug() << tilt;
         this->plot2->graph(0)->addData(time, tilt);
         this->plot2->graph(0)->removeDataBefore(time-8);
