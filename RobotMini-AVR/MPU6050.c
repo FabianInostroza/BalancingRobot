@@ -16,17 +16,21 @@ uint8_t setupMPU6050(uint8_t addr)
     err |= mpu6050_writeReg(addr, MPU6050_RA_SMPLRT_DIV, 4); // 200Hz
     //err |= mpu6050_writeReg(addr, MPU6050_RA_SMPLRT_DIV, 9); // 100Hz
     //err = mpu6050_writeReg(addr, MPU6050_RA_SMPLRT_DIV, 19); // 50Hz
-    // activar pruebas del giroscopio, rango = +/-250 deg/s
-    //err = mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0);
+
     err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0x10);// +/- 1000 deg/s
     err |= mpu6050_gyroCal(addr);
-    err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0x08);// +/-500 deg/s
+    //err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0x08);// +/-500 deg/s
+    err = mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0); // +/-250 deg/s
     // activar pruebas del acelerometro, rango = +/-8g
-    //err = mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x80);
+    //err = mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x10);
+    err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (135), (-284));
     err |= mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x0); // +/-2g
-    // activar fifo para giroscopio x y acelerometro
+    // activar fifo para giroscopios y acelerometro
     //err |= mpu6050_writeReg(addr, MPU6050_RA_FIFO_EN, 0x78);
-    err |= mpu6050_writeReg(addr, MPU6050_RA_FIFO_EN, 0x48);
+    // activar fifo para giroscopio x y acelerometro
+    //err |= mpu6050_writeReg(addr, MPU6050_RA_FIFO_EN, 0x48);
+    // activar fifo para giroscopio y y acelerometro
+    err |= mpu6050_writeReg(addr, MPU6050_RA_FIFO_EN, 0x28);
     // configuracion del pin de interrupcion
     // active high, push-pull, pulso de 50us, flag se borra en cualquier lectura
     err |= mpu6050_writeReg(addr, MPU6050_RA_INT_PIN_CFG, 0x10);
@@ -36,9 +40,9 @@ uint8_t setupMPU6050(uint8_t addr)
     err |= mpu6050_writeReg(addr, MPU6050_RA_USER_CTRL, 0x44);
     _delay_ms(2);
     // activar fifo
-    //err |= mpu6050_writeReg(addr, MPU6050_RA_USER_CTRL, 0x44);
+    err |= mpu6050_writeReg(addr, MPU6050_RA_USER_CTRL, 0x44);
     // fifo inactiva
-    err |= mpu6050_writeReg(addr, MPU6050_RA_USER_CTRL, 0x04);
+    //err |= mpu6050_writeReg(addr, MPU6050_RA_USER_CTRL, 0x04);
     //err = mpu6050_setGyroOffsets(0x68, 45/2, 212/2, -2/2);
     return err;
     // agregar mas inicializacion
@@ -101,6 +105,36 @@ uint8_t mpu6050_readGyro(uint8_t addr, int16_t * gx, int16_t * gy, int16_t * gz)
         return -1;
     *gz = (h << 8) | l;
     return 0;
+}
+
+uint8_t mpu6050_setAccelOffsets(uint8_t addr, int16_t ax, int16_t ay, int16_t az)
+{
+    int16_t offsets[3];
+    uint8_t err;
+    if( (err = mpu6050_burstReadWord(addr, MPU6050_RA_XA_OFFS_H, offsets, 3) ) )
+        return err;
+//
+//    UART0_send_hex16(offsets[0]);
+//    UART0_Tx('\t');
+//    UART0_send_hex16(offsets[1]);
+//    UART0_Tx('\t');
+//    UART0_send_hex16(offsets[2]);
+//    UART0_Tx('\n');
+
+    // es necesario conservar el bit0 de los offsets (datasheet).
+    // suma en complemento a 2 es igual a suma comun por lo que
+    // la operacion de abajo no modifica el bit 0
+    offsets[0] -= (ax & ~1);
+    offsets[1] -= (ay & ~1);
+    offsets[2] -= (az & ~1);
+
+//    offsets[0] &= 0x0001;
+//    offsets[1] &= 0x0001;
+//    offsets[2] &= 0x0001;
+
+    if ( (err = mpu6050_burstWriteWord(addr, MPU6050_RA_XA_OFFS_H, offsets, 3) ) )
+        return err;
+
 }
 
 uint8_t mpu6050_setGyroOffsets(uint8_t addr, int16_t gx, int16_t gy, int16_t gz)
@@ -236,3 +270,26 @@ uint8_t mpu6050_burstWrite(uint8_t addr, uint8_t reg, uint8_t * data, uint8_t n)
     return 0;
 }
 
+uint8_t mpu6050_burstWriteWord(uint8_t addr, uint8_t reg, int16_t * data, uint8_t n)
+{
+    uint8_t err, i, d;
+    err = twi_start(addr, 1);
+    if (err)
+        return err;
+
+    err = twi_write(reg);
+    if (err)
+        return err;
+
+    for ( i = 0; i < n; i++){
+        d = (data[i] >> 8) & 0xff;
+        err |= twi_write(d);
+        d = data[i] & 0xff;
+        err |= twi_write(d);
+        if ( err )
+            return err;
+    }
+
+    twi_stop();
+    return 0;
+}
