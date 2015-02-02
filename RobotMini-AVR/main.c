@@ -12,12 +12,62 @@
 
 #define ENVIAR_DATOS
 
-//#include <avr/pgmspace.h>
-//
-//static const volatile uint32_t tabla[8191] PROGMEM = {[0 ... 8190] = 0xFFFFFFFF};
-//static const volatile uint32_t tabla2[8191] PROGMEM = {[0 ... 8190] = 0xFFFFFFFF};
+static volatile uint8_t data_ready = 0;
+static volatile uint8_t update_ks = 0;
+static volatile int16_t kpid = 0;
 
-static volatile uint8_t data_ready;
+ISR(USART0_RX_vect)
+{
+    char c = 0;
+    static uint16_t tmp = 0;
+    static uint8_t st = 0, st2 = 0;
+    c = UDR0;
+    UDR0 = c;
+    switch(st){
+        case 0:
+            switch(c){
+                case 'p':
+                case 'P':
+                    st2 = 1;
+                    break;
+                case 'i':
+                case 'I':
+                    st2 = 2;
+                    break;
+                case 'd':
+                case 'D':
+                    st2 = 3;
+                    break;
+                case ':':
+                case '\n':
+                    st = 1;
+                    tmp = 0;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case 1:
+            if (c >= '0' && c <= '9'){
+                tmp = tmp*16 + c - '0';
+            }else
+            if ( c >= 'a' && c <= 'f'){
+                tmp = tmp*16 + c - 'a' + 10;
+            }else
+            if ( c >= 'A' && c <= 'F'){
+                tmp = tmp*16 + c - 'A' + 10;
+            }else
+            if ( c == ':' || c == '\n'){
+                st = 0;
+                update_ks = st2;
+                st2 = 0;
+                kpid = tmp;
+            }
+            break;
+        default:
+            break;
+    }
+}
 
 ISR(INT2_vect)
 {
@@ -36,6 +86,7 @@ int main(void)
     //const float gyro_k = 1/65.5*t0; // +/-500 deg/s
 //    const float gyro_k = 1/32.8*t0; // +/-1000 deg/s
     float tilt = 0, tilt_r = 0;
+    int16_t kp = 0, ki = 0, kd = 0;
     uint8_t tmp;
 
     DDRB = (1 << PIN0);
@@ -46,7 +97,8 @@ int main(void)
     EIMSK = (1 << INT2); // activar interrupcion INT2
 
     setup_pwm();
-    setupUART0(1, 0);
+    setupUART0(1, 1);
+    UART0_enRxInt(1);
 
     // activar el watchdog
     //WDTCSR = (1 << WDE) | (1 << WDP2) | (1 << WDP1) | (1 << WDP0);
@@ -147,6 +199,30 @@ int main(void)
             //UART0_sends("hah\n");
         }
 
+        switch(update_ks){
+            case 1:
+                kp = kpid;
+                update_ks = 0;
+                sprintf(buf, "%i\t%i\%i\n", kp, ki, kd);
+                UART0_sends(buf);
+                break;
+            case 2:
+                ki = kpid;
+                update_ks = 0;
+                sprintf(buf, "%i\t%i\%i\n", kp, ki, kd);
+                UART0_sends(buf);
+                break;
+            case 3:
+                kd = kpid;
+                update_ks = 0;
+                sprintf(buf, "%i\t%i\%i\n", kp, ki, kd);
+                UART0_sends(buf);
+                break;
+            case 0:
+            default:
+                update_ks = 0;
+                break;
+        }
         wdt_reset();
         //_delay_ms(1);
     }
