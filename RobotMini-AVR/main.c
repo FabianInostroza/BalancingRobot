@@ -22,7 +22,6 @@ ISR(USART0_RX_vect)
     static uint16_t tmp = 0;
     static uint8_t st = 0, st2 = 0;
     c = UDR0;
-    UDR0 = c;
     switch(st){
         case 0:
             switch(c){
@@ -46,22 +45,27 @@ ISR(USART0_RX_vect)
                 default:
                     break;
             }
+            UDR0 = c;
             break;
         case 1:
             if (c >= '0' && c <= '9'){
                 tmp = tmp*16 + c - '0';
+                UDR0 = c;
             }else
             if ( c >= 'a' && c <= 'f'){
                 tmp = tmp*16 + c - 'a' + 10;
+                UDR0 = c;
             }else
             if ( c >= 'A' && c <= 'F'){
                 tmp = tmp*16 + c - 'A' + 10;
+                UDR0 = c;
             }else
             if ( c == ':' || c == '\n'){
                 st = 0;
                 update_ks = st2;
                 st2 = 0;
                 kpid = tmp;
+                UDR0 = '\n';
             }
             break;
         default:
@@ -87,6 +91,7 @@ int main(void)
 //    const float gyro_k = 1/32.8*t0; // +/-1000 deg/s
     float tilt = 0, tilt_r = 0;
     int16_t kp = 0, ki = 0, kd = 0;
+    float error = 0;
     uint8_t tmp;
 
     DDRB = (1 << PIN0);
@@ -160,7 +165,9 @@ int main(void)
             if ( tilt_r <= -5)
                 tilt_r = -5;
 
-            pwm = 600*tilt_r;// + mpu_buf[3]/64;
+            error = 0 - tilt_r;
+
+            pwm = -600*error;// + mpu_buf[3]/64;
 
             if ( tilt >= 60.0 || tilt <= -60.0)
                 pwm = 0;
@@ -203,24 +210,22 @@ int main(void)
             case 1:
                 kp = kpid;
                 update_ks = 0;
-                sprintf(buf, "%i\t%i\%i\n", kp, ki, kd);
+                sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
                 UART0_sends(buf);
                 break;
             case 2:
                 ki = kpid;
                 update_ks = 0;
-                sprintf(buf, "%i\t%i\%i\n", kp, ki, kd);
+                sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
                 UART0_sends(buf);
                 break;
             case 3:
                 kd = kpid;
                 update_ks = 0;
-                sprintf(buf, "%i\t%i\%i\n", kp, ki, kd);
+                sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
                 UART0_sends(buf);
                 break;
-            case 0:
             default:
-                update_ks = 0;
                 break;
         }
         wdt_reset();

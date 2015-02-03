@@ -143,7 +143,7 @@
 %    pdfmenubar=true,        % show Acrobat’s menu?
     pdffitwindow=false,     % window fit to page when opened
     pdfstartview={FitH},    % fits the width of the page to the window
-    pdftitle={Filtros},    % title
+    pdftitle={Filtros, filtro, complementario, complementary, filter, mpu6050, tilt, angle, ángulo, inclinación},    % title
     pdfauthor={Fabián Inostroza},     % author
 %    pdfsubject={Subject},   % subject of the document
 %    pdfcreator={Creator},   % creator of the document
@@ -166,8 +166,8 @@ La función de transferencia continua de un integrador es
 \[ H(s) = \frac{1}{s}. \]
 En el método de Euler se aproxima la integral con la siguiente 
 ecuación
-\[ y_k = y_{k-1}+ u_k\cdot T_0 \]
-donde \( y_k \) es el valor de integral al paso \( k \),
+\[ y(k) = y(k-1)+ u(k)\cdot T_0 \]
+donde \( y(k) \) es el valor de integral al paso \( k \),
 \( u_k \) es la variable a integrar y \( T_0 \) es el 
 tiempo de muestreo. Aplicando la transformada Z a la ecuación 
 anterior se obtiene la siguiente función de transferencia
@@ -198,9 +198,9 @@ Usando \eqref{eq:s2z} se obtiene
 \[ H(z) = \frac{\omega_c}{(1-z^{-1})/T_0 + \omega_c} \]
 Aplicando transformada Z inversa se obtiene
 \begin{align*}
-y_k &= \frac{1}{T_0 (1/T_0+\omega_c)
-} y_{k-1} + \frac{\omega_c}{1/T_0+\omega_c} u_k  \\
-	&= (1-\alpha)y_{k-1} + \alpha u_k
+y(k) &= \frac{1}{T_0 (1/T_0+\omega_c)
+} y(k-1) + \frac{\omega_c}{1/T_0+\omega_c} u(k)  \\
+	&= (1-\alpha)y(k-1) + \alpha u(k)
 \end{align*}
 donde
 \[ \alpha = \frac{\omega_c}{1/T_0+\omega_c} \]
@@ -223,8 +223,8 @@ Usando \eqref{eq:s2z} se obtiene
 \[ H(z) = \frac{(1-z^{-1})/T_0}{(1-z^{-1})/T_0 + \omega_c} \]
 Aplicando transformada Z inversa se obtiene
 \begin{align*}
-y_k &= \frac{1/T_0}{1/T_0+\omega_c} y_{k-1} + \frac{1/T_0}{1/T_0+\omega_c} (u_k-u_{k-1})  \\
-	&= \beta y_{k-1} + \beta (u_k-u_{k-1})
+y(k) &= \frac{1/T_0}{1/T_0+\omega_c} y(k-1) + \frac{1/T_0}{1/T_0+\omega_c} [u(k)-u(k-1)]  \\
+	&= \beta y(k-1) + \beta [u(k)-u(k-1)]
 \end{align*}
 donde
 \[ \beta = \frac{1/T_0}{1/T_0+\omega_c} \]
