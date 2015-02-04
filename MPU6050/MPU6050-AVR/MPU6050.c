@@ -29,9 +29,9 @@ uint8_t setupMPU6050(uint8_t addr)
     // con rango +/-16g
     //err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (96), (-382));
     //err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (135), (-308));
-    err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (135), (-284));
+    //err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (135), (-284));
     //err |= mpu6050_setAccelOffsets(0x68, 0, 0, -622);
-    err |= mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x0); // +/-2g
+    //err |= mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x0); // +/-2g
     // activar fifo para giroscopio y acelerometro
     err |= mpu6050_writeReg(addr, MPU6050_RA_FIFO_EN, 0x78);
     // configuracion del pin de interrupcion

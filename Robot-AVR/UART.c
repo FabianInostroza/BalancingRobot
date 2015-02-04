@@ -8,11 +8,10 @@
     defined(USE_UART1_TX_INTERRUPT) || defined(USE_UART1_RX_INTERRUPT)
 #warning "Usando transmision por interrupciones"
 #warning "Debes activar las interrupciones ejecutando sei()"
+#include <avr/interrupt.h>
 #endif
 
 #ifdef USE_UART0_TX_INTERRUPT
-#include <avr/interrupt.h>
-
 // USART0_RX_vect
 
 static char buf0[TX0_BUFFER_SIZE];
@@ -163,9 +162,8 @@ inline void UART0_send_hex(uint8_t h)
 
 /*******************************************************/
 #ifdef USE_UART1_TX_INTERRUPT
-#include <avr/interrupt.h>
 
-// USART0_RX_vect
+// USART1_RX_vect
 
 static char buf1[TX1_BUFFER_SIZE];
 static volatile uint8_t tx1_tail_pointer = 0;

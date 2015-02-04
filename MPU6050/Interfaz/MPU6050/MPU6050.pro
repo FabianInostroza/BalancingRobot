@@ -14,14 +14,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    qcustomplot.cpp \
+    ../../../Librerias/qcustomplot/qcustomplot.cpp \
     serialcomms.cpp
 
 HEADERS  += mainwindow.h \
-    qcustomplot.h \
+    ../../../Librerias/qcustomplot/qcustomplot.h \
     serialcomms.h
 
-INCLUDEPATH += ../qtserialport-build/include
-LIBS += -L../qtserialport-build/src/serialport -lQtSerialPort
+INCLUDEPATH += ../../../Librerias/qtserialport-build/include
+LIBS += -L../../../Librerias/qtserialport-build/src/serialport -lQtSerialPort
 
 #FORMS    +=

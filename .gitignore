@@ -62,6 +62,12 @@
 
 # ejecutables
 MPU6050/Interfaz/MPU6050/MPU6050
+InterfazRobot/InterfazRobot
+
+# qt
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
 
 #latex
 *.synctex.gz

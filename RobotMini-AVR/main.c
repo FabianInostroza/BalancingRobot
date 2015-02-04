@@ -86,11 +86,12 @@ int main(void)
     uint8_t err;
     const float alpha = 0.02;
     const float t0 = 1.0/200.0;
-    const float gyro_k = 1/131.0*t0; // +/-250 deg/s
+    const float gyro_sens = 1.0/131.0;
+    const float gyro_k = gyro_sens*t0; // +/-250 deg/s
     //const float gyro_k = 1/65.5*t0; // +/-500 deg/s
 //    const float gyro_k = 1/32.8*t0; // +/-1000 deg/s
-    float tilt = 0, tilt_r = 0;
-    int16_t kp = 0, ki = 0, kd = 0;
+    float tilt = 90, tilt_r = 90, derror = 0;
+    int16_t kp = -600, ki = 0, kd = 8;
     float error = 0;
     uint8_t tmp;
 
@@ -157,6 +158,8 @@ int main(void)
 
             tilt = (1.0-alpha)*(tilt + mpu_buf[3]*gyro_k) + alpha*tilt_r;
 
+            derror = 0 - mpu_buf[3]*gyro_sens;
+
             tilt_r = tilt;
 
             if (tilt_r >= 5) {
@@ -165,12 +168,12 @@ int main(void)
             if ( tilt_r <= -5)
                 tilt_r = -5;
 
-            error = 0 - tilt_r;
-
-            pwm = -600*error;// + mpu_buf[3]/64;
-
-            if ( tilt >= 60.0 || tilt <= -60.0)
+            if ( tilt >= 60.0 || tilt <= -60.0){
                 pwm = 0;
+            }else{
+                error = 0 - tilt_r;
+                pwm = kp*error + kd*derror;
+            }
 
             if (pwm > 0x3ff)
                 pwm = 0x3ff;
@@ -199,9 +202,9 @@ int main(void)
 //            UART0_Tx('\t');
 //            UART0_send_hex16(mpu_buf[3]);
 //            UART0_Tx('\t');
-//            sprintf(buf, "%-5i\t%.2f\t%.2X\n",mpu_buf[3], tilt, err);
+            sprintf(buf, "%.2f\t%.2f\n", derror, tilt);
 ////            sprintf(buf, "%i\t%.2X\n", mpu_buf[3], err);
-//            UART0_sends(buf);
+            UART0_sends(buf);
 #endif
             //UART0_sends("hah\n");
         }

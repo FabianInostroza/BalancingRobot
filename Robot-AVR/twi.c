@@ -15,9 +15,9 @@ void setupTWI(void)
     //TWBR = 48; // Freq(SCL) = 16e6/(16+2*48*16)=10kHz
     // preescaler = 1
     //TWBR = 13; // 380952 Hz
-    TWBR = (F_CPU/100000L-16L)/2;
+    //TWBR = (F_CPU/100000L-16L)/2;
     //TWBR = (F_CPU/200000L-16L)/2;
-    //TWBR = (F_CPU/300000L-16L)/2;
+    TWBR = (F_CPU/300000L-16L)/2;
 }
 
 uint8_t twi_start(uint8_t addr, uint8_t w)
