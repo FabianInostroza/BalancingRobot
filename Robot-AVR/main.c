@@ -168,8 +168,8 @@ int main(void)
             }
 
 #ifdef ENVIAR_DATOS
-//            UART0_send_hex16(mpu_buf[1]);
-//            UART0_Tx('\t');
+            UART0_send_hex16(pwm);
+            UART0_Tx('\t');
 //            UART0_send_hex16(mpu_buf[2]);
 //            UART0_Tx('\t');
 //            UART0_send_hex16(mpu_buf[3]);
@@ -181,27 +181,23 @@ int main(void)
             //UART0_sends("hah\n");
         }
 
-        switch(update_ks){
-            case 1:
-                kp = kpid;
-                update_ks = 0;
-                sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
-                UART0_sends(buf);
-                break;
-            case 2:
-                ki = kpid;
-                update_ks = 0;
-                sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
-                UART0_sends(buf);
-                break;
-            case 3:
-                kd = kpid;
-                update_ks = 0;
-                sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
-                UART0_sends(buf);
-                break;
-            default:
-                break;
+        if (update_ks){
+            switch(update_ks){
+                case 1:
+                    kp = kpid;
+                    break;
+                case 2:
+                    ki = kpid;
+                    break;
+                case 3:
+                    kd = kpid;
+                    break;
+                default:
+                    break;
+            }
+            sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
+            UART0_sends(buf);
+            update_ks = 0;
         }
         wdt_reset();
         //_delay_ms(1);
