@@ -78,18 +78,31 @@ ISR(INT2_vect)
     data_ready = 1;
 }
 
+int16_t deadBand_comp(int16_t x)
+{
+    if(x < 0 )
+        return x - 200;
+    else
+        return x + 200;
+}
+
+
 int main(void)
 {
     int16_t mpu_buf[6];
     char buf[30];
-    int16_t pwm, pwmb;
+    int16_t pwm, pwmb, pwm_cmp = 0;
     uint8_t err;
+    uint8_t init = 1;
+    // alpha = wc/(1/T0+wc)
+    // wc = 1/T0*alpha/(1-alpha) = f0*alpha/(1-alpha)
+    // wc = 200*0.02/0.98 = 4.08 rad/s = 0.64 Hz
     const float alpha = 0.02;
     const float t0 = 1.0/200.0;
-    const float gyro_sens = 1.0/131.0;
-    const float gyro_k = gyro_sens*t0; // +/-250 deg/s
-    //const float gyro_k = 1/65.5*t0; // +/-500 deg/s
-//    const float gyro_k = 1/32.8*t0; // +/-1000 deg/s
+    const float gyro_sens = 1.0/131.0; // +/-250 deg/s
+    //const float gyro_sens = 1/65.5; // +/-500 deg/s
+    //const float gyro_sens = 1/32.8; // +/-1000 deg/s
+    const float gyro_k = gyro_sens*t0; // pal filtro complementario
     float tilt = 90, tilt_r = 90, derror = 0;
     int16_t kp = -600, ki = 0, kd = 2;
     float error = 0;
@@ -126,59 +139,67 @@ int main(void)
 
             tilt_r = atan2(mpu_buf[1], mpu_buf[2])*180/M_PI;
 
-            tilt = (1.0-alpha)*(tilt + mpu_buf[3]*gyro_k) + alpha*tilt_r;
-
-            derror = 0 - mpu_buf[3]*gyro_sens;
-
-            tilt_r = tilt;
-
-            if (tilt_r >= 5) {
-                tilt_r = 5;
-            }
-            if ( tilt_r <= -5)
-                tilt_r = -5;
-
-            if ( tilt >= 60.0 || tilt <= -60.0){
-                pwm = 0;
+            if( init ){
+                init = 0;
+                tilt = tilt_r;
             }else{
-                error = 0 - tilt_r;
-                pwm = kp*error + kd*derror;
+                tilt = (1.0-alpha)*(tilt + mpu_buf[3]*gyro_k) + alpha*tilt_r;
+
+                derror = 0 - mpu_buf[3]*gyro_sens;
+
+                tilt_r = tilt;
+
+                if (tilt_r >= 5) {
+                    tilt_r = 5;
+                }
+                if ( tilt_r <= -5)
+                    tilt_r = -5;
+
+                if ( tilt >= 60.0 || tilt <= -60.0){
+                    pwm = 0;
+                    pwm_cmp = 0;
+                }else{
+                    error = 0 - tilt_r;
+                    pwm = kp*error + kd*derror;
+                    pwm_cmp = deadBand_comp(pwm);
+                }
+
+                if (pwm_cmp > 0x3ff)
+                    pwm_cmp = 0x3ff;
+
+                if (pwm_cmp < -0x3ff)
+                    pwm_cmp = -0x3ff;
+
+                pwmb = 0.89*pwm_cmp;
+
+                if ( pwm < 0 ){
+                    OCR1A = -pwm_cmp; // B-IA
+                    OCR1B = 0; // B-IB
+
+                    OCR3A = -pwmb; // A-IA
+                    OCR3B = 0; // A-IB
+                }else{
+                    OCR1A = 0; // B-IA
+                    OCR1B = pwm_cmp; // B-IB
+
+                    OCR3A = 0; // A-IA
+                    OCR3B = pwmb; // A-IB
+                }
+
+    #ifdef ENVIAR_DATOS
+                UART0_Tx(':');
+                UART0_send_hex16(pwm);
+                UART0_Tx('\t');
+    //            UART0_send_hex16(mpu_buf[2]);
+    //            UART0_Tx('\t');
+    //            UART0_send_hex16(mpu_buf[3]);
+    //            UART0_Tx('\t');
+                sprintf(buf, "%.2f\t%.2f\n", derror, tilt);
+    ////            sprintf(buf, "%i\t%.2X\n", mpu_buf[3], err);
+                UART0_sends(buf);
+    #endif
+                //UART0_sends("hah\n");
             }
-
-            if (pwm > 0x3ff)
-                pwm = 0x3ff;
-
-            if (pwm < -0x3ff)
-                pwm = -0x3ff;
-
-            pwmb = pwm;
-
-            if ( pwm < 0 ){
-                OCR1A = -pwm; // B-IA
-                OCR1B = 0; // B-IB
-
-                OCR3A = -pwmb; // A-IA
-                OCR3B = 0; // A-IB
-            }else{
-                OCR1A = 0; // B-IA
-                OCR1B = pwm; // B-IB
-
-                OCR3A = 0; // A-IA
-                OCR3B = pwmb; // A-IB
-            }
-
-#ifdef ENVIAR_DATOS
-            UART0_send_hex16(pwm);
-            UART0_Tx('\t');
-//            UART0_send_hex16(mpu_buf[2]);
-//            UART0_Tx('\t');
-//            UART0_send_hex16(mpu_buf[3]);
-//            UART0_Tx('\t');
-            sprintf(buf, "%.2f\t%.2f\n", derror, tilt);
-////            sprintf(buf, "%i\t%.2X\n", mpu_buf[3], err);
-            UART0_sends(buf);
-#endif
-            //UART0_sends("hah\n");
         }
 
         if (update_ks){
@@ -195,8 +216,8 @@ int main(void)
                 default:
                     break;
             }
-            sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
-            UART0_sends(buf);
+//            sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
+//            UART0_sends(buf);
             update_ks = 0;
         }
         wdt_reset();

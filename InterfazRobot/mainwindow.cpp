@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include <QVector>
-#include <QSlider>
+#include <QtSerialPort/QSerialPortInfo>
 
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent)
@@ -10,18 +10,32 @@ MainWindow::MainWindow(QWidget *parent) :
     plot = new QCustomPlot();
     plot2 = new QCustomPlot();
 
-    layout->addWidget(plot, 0, 0);
-    layout->addWidget(plot2, 1, 0);
+    layout->addWidget(plot, 0, 0, 3, 1);
+    layout->addWidget(plot2, 3, 0, 3, 1);
+
+    QList<QSerialPortInfo> sp_list = QSerialPortInfo::availablePorts();
+
+    qDebug() << sp_list[0].portName();
     
-    QSlider * kp = new QSlider(-32768, 0x7fff);
+    kp = new QSlider(Qt::Vertical);
     //QSlider * ki = new QSlider(0, 0x7fff);
-    QSlider * kd = new QSlider(-32768, 0x7fff);
-    
-    layout->addWidget(kp, 0, 1, 2, 1);
-    layout->addWidget(kp, 0, 2, 2, 1);
+    kd = new QSlider(Qt::Vertical);
+    kp->setMaximum(1500);
+    kp->setMinimum(-1500);
+    kd->setMaximum(50);
+    kd->setMinimum(-50);
+
+    lcd_kp = new QLCDNumber(this);
+    lcd_kd = new QLCDNumber(this);
+
+    layout->addWidget(kp, 0, 1, 5, 1);
+    layout->addWidget(kd, 0, 2, 5, 1);
+    layout->addWidget(lcd_kp, 5, 1, 1, 1);
+    layout->addWidget(lcd_kd, 5, 2, 1, 1);
 
     serial_thread = new QThread();
-    serialReader = new SerialComms("/dev/ttyUSB0", 115200);
+    //serialReader = new SerialComms("/dev/ttyUSB0", 115200);
+    serialReader = new SerialComms("/dev/" + sp_list[0].portName(), 115200);
     serialReader->moveToThread(serial_thread);
     connect(serialReader, SIGNAL(finished()), serial_thread, SLOT(quit()));
     //connect(serial_thread, SIGNAL(started()), serialReader, SLOT(readData()));
@@ -29,6 +43,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(serialReader, SIGNAL(dataReady(QByteArray*)), this, SLOT(readData(QByteArray*)));
     //connect(QCoreApplication.instance(),SIGNAL()
     serial_thread->start();
+
+    connect(kp, SIGNAL(valueChanged(int)), this, SLOT(setKp(int)));
+    connect(kd, SIGNAL(valueChanged(int)), this, SLOT(setKd(int)));
+    connect(kp, SIGNAL(valueChanged(int)), this->lcd_kp, SLOT(display(int)));
+    connect(kd, SIGNAL(valueChanged(int)), this->lcd_kd, SLOT(display(int)));
+    connect(this, SIGNAL(updateKd(QByteArray)), serialReader, SLOT(write(const QByteArray)));
+    connect(this, SIGNAL(updateKp(QByteArray)), serialReader, SLOT(write(const QByteArray)));
 
     // desactiva antialias
     /*
@@ -116,11 +137,18 @@ void MainWindow::readData(QByteArray * d)
 {
     double time = datetime->currentDateTime().toMSecsSinceEpoch()/1000.0;
     static double last_time;
-    QList<QByteArray> list = d->split('\t');
+    QByteArray m = d->trimmed();
     delete d;
+    QList<QByteArray> list;
     bool ok;
-    
-    //qDebug() << list;
+    const int width = 5;
+
+    if( m.startsWith(':')){
+        QList<QByteArray> l1 = m.split(':');
+        list = l1[1].split('\t');
+    }else{
+        return;
+    }
     
     if (list.length() >= 3){
         int16_t pwm = ((int16_t)list[0].toInt(&ok, 16));
@@ -128,13 +156,13 @@ void MainWindow::readData(QByteArray * d)
         float derror = list[1].toFloat();
 
         this->plot2->graph(0)->addData(time, tilt);
-        this->plot2->graph(0)->removeDataBefore(time-8);
+        this->plot2->graph(0)->removeDataBefore(time-width);
         this->plot2->graph(1)->addData(time, derror);
-        this->plot2->graph(1)->removeDataBefore(time-8);
+        this->plot2->graph(1)->removeDataBefore(time-width);
 
         this->plot->graph(0)->addData(time, pwm);
 
-        this->plot->graph(0)->removeDataBefore(time-8);
+        this->plot->graph(0)->removeDataBefore(time-width);
         /*
         this->plot->graph(0)->addData(time, ax);
         this->plot->graph(0)->removeDataBefore(time-8);
@@ -151,8 +179,8 @@ void MainWindow::readData(QByteArray * d)
         this->plot2->graph(2)->addData(time, gz);
         this->plot2->graph(2)->removeDataBefore(time-8);
         */
-        this->plot2->xAxis->setRange(time+0.25, 8, Qt::AlignRight);
-        this->plot->xAxis->setRange(time+0.25, 8, Qt::AlignRight);
+        this->plot2->xAxis->setRange(time+0.25, width, Qt::AlignRight);
+        this->plot->xAxis->setRange(time+0.25, width, Qt::AlignRight);
 
         if( (time - last_time) > 0.05){
             this->plot->replot();
@@ -160,4 +188,16 @@ void MainWindow::readData(QByteArray * d)
             last_time = time;
         }
     }
+}
+
+void MainWindow::setKp(int kp)
+{
+    QString msg = QString("p:%1:").arg(kp, 0, 16);
+    emit this->updateKp(msg.toAscii());
+}
+
+void MainWindow::setKd(int kd)
+{
+    QString msg = QString("d:%1:").arg(kd, 0, 16);
+    emit this->updateKd(msg.toAscii());
 }

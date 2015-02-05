@@ -102,3 +102,17 @@ void SerialComms::readLine()
         //qDebug() << data << endl;
     }
 }
+
+void SerialComms::write(const char * str)
+{
+    if (this->m_serialPort && this->m_serialPort->isOpen()){
+        this->m_serialPort->write(str);
+    }
+}
+
+void SerialComms::write(const QByteArray str)
+{
+    if (this->m_serialPort && this->m_serialPort->isOpen()){
+        this->m_serialPort->write(str);
+    }
+}

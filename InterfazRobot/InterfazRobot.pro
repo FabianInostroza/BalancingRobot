@@ -22,6 +22,6 @@ HEADERS  += mainwindow.h \
     serialcomms.h
 
 INCLUDEPATH += ../Librerias/qtserialport-build/include
-LIBS += -L../Librerias/qtserialport-build/src/serialport -lQtSerialPort
+LIBS += -L../Librerias/qtserialport-build/src/serialport -lQtSerialPort -ludev
 
 #FORMS    +=

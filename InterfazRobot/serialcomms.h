@@ -22,6 +22,8 @@ public slots:
     void stop();
     void start(void);
 
+    void write(const char *str);
+    void write(const QByteArray str);
 protected slots:
     void readLine();
 private:

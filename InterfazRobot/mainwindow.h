@@ -10,6 +10,8 @@
 #include <QLCDNumber>
 #include "qcustomplot.h"
 #include <QThread>
+#include <QLCDNumber>
+#include <QSlider>
 #include "serialcomms.h"
 
 class MainWindow : public QWidget
@@ -24,6 +26,9 @@ protected slots:
     void updatePlot();
     void readData(QByteArray *d);
 
+private slots:
+    void setKp(int kp);
+    void setKd(int kd);
 private:
     QDial * dial;
     QTimer * timer;
@@ -35,6 +40,14 @@ private:
     QLCDNumber * lcd;
     QThread * serial_thread;
     SerialComms * serialReader;
+    QSlider * kp;
+    QSlider * kd;
+    QLCDNumber * lcd_kp;
+    QLCDNumber * lcd_kd;
+
+signals:
+    void updateKp(QByteArray s);
+    void updateKd(QByteArray s);
 };
 
 #endif // MAINWINDOW_H

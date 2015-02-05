@@ -198,8 +198,8 @@ Usando \eqref{eq:s2z} se obtiene
 \[ H(z) = \frac{\omega_c}{(1-z^{-1})/T_0 + \omega_c} \]
 Aplicando transformada Z inversa se obtiene
 \begin{align*}
-y(k) &= \frac{1}{T_0 (1/T_0+\omega_c)
-} y(k-1) + \frac{\omega_c}{1/T_0+\omega_c} u(k)  \\
+y(k) &= \frac{1/T_0}{1/T_0+\omega_c}y(k-1) + 
+\frac{\omega_c}{1/T_0+\omega_c} u(k)  \\
 	&= (1-\alpha)y(k-1) + \alpha u(k)
 \end{align*}
 donde
