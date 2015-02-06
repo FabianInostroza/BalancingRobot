@@ -78,12 +78,12 @@ ISR(INT2_vect)
     data_ready = 1;
 }
 
-int16_t deadBand_comp(int16_t x)
+inline int16_t deadBand_comp(int16_t x)
 {
     if(x < 0 )
-        return x - 200;
+        return x - 100;
     else
-        return x + 200;
+        return x + 100;
 }
 
 
@@ -104,7 +104,7 @@ int main(void)
     //const float gyro_sens = 1/32.8; // +/-1000 deg/s
     const float gyro_k = gyro_sens*t0; // pal filtro complementario
     float tilt = 90, tilt_r = 90, derror = 0;
-    int16_t kp = -600, ki = 0, kd = 2;
+    int16_t kp = -300, ki = 0, kd = 0;
     float error = 0;
     uint8_t tmp;
 
@@ -137,7 +137,7 @@ int main(void)
 
             err |= mpu6050_burstReadWord(0x68, MPU6050_RA_FIFO_R_W, mpu_buf, 4);
 
-            tilt_r = atan2(mpu_buf[1], mpu_buf[2])*180/M_PI;
+            tilt_r = atan2(mpu_buf[1], mpu_buf[2])*180/M_PI - 1.0;
 
             if( init ){
                 init = 0;
@@ -155,7 +155,7 @@ int main(void)
                 if ( tilt_r <= -5)
                     tilt_r = -5;
 
-                if ( tilt >= 60.0 || tilt <= -60.0){
+                if ( tilt >= 30.0 || tilt <= -30.0){
                     pwm = 0;
                     pwm_cmp = 0;
                 }else{
@@ -172,7 +172,7 @@ int main(void)
 
                 pwmb = 0.89*pwm_cmp;
 
-                if ( pwm < 0 ){
+                if ( pwm_cmp < 0 ){
                     OCR1A = -pwm_cmp; // B-IA
                     OCR1B = 0; // B-IB
 
@@ -188,7 +188,7 @@ int main(void)
 
     #ifdef ENVIAR_DATOS
                 UART0_Tx(':');
-                UART0_send_hex16(pwm);
+                UART0_send_hex16(pwm_cmp);
                 UART0_Tx('\t');
     //            UART0_send_hex16(mpu_buf[2]);
     //            UART0_Tx('\t');
@@ -221,7 +221,6 @@ int main(void)
             update_ks = 0;
         }
         wdt_reset();
-        //_delay_ms(1);
     }
 
     return 0;

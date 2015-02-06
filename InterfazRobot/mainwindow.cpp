@@ -70,16 +70,14 @@ MainWindow::MainWindow(QWidget *parent) :
 //    }
 
     plot->addGraph(); // blue line
-    plot->addGraph(); // blue line
-    plot->addGraph(); // blue line
-    plot->graph(0)->setPen(QPen(Qt::red));
-    plot->graph(1)->setPen(QPen(Qt::green));
-    plot->graph(2)->setPen(QPen(Qt::blue));
+    plot->graph(0)->setPen(QPen(Qt::blue));
+    plot->graph(0)->setName("Duty Cycle: 0");
     //plot->graph(0)->setBrush(QBrush(QColor(240, 255, 200)));
     //plot->graph(0)->setAntialiasedFill(false);
     //plot->graph(0)->setData(xdata, ydata);
     //plot->xAxis->setRange(-1, 1);
     plot->yAxis->setRange(-1050, 1050);
+    plot->legend->setVisible(true);
 
     plot->xAxis->setTickLabelType(QCPAxis::ltDateTime);
     plot->xAxis->setDateTimeFormat("hh:mm:ss");
@@ -87,18 +85,19 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->xAxis->setTickStep(2);
     plot->axisRect()->setupFullAxesBox();
 
-    plot2->addGraph(); // blue line
-    plot2->addGraph(); // blue line
-    plot2->addGraph(); // blue line
+    plot2->addGraph();
+    plot2->addGraph();
     plot2->graph(0)->setPen(QPen(Qt::red));
-    plot2->graph(1)->setPen(QPen(Qt::green));
-    plot2->graph(2)->setPen(QPen(Qt::blue));
+    plot2->graph(0)->setName("Tilt: 0 [deg]");
+    plot2->graph(1)->setPen(QPen(Qt::blue));
+    plot2->graph(1)->setName("D error: 0 [deg/s]");
     //plot->graph(0)->setBrush(QBrush(QColor(240, 255, 200)));
     //plot->graph(0)->setAntialiasedFill(false);
     //plot->graph(0)->setData(xdata, ydata);
     //plot->xAxis->setRange(-1, 1);
 //    plot2->yAxis->setRange(-500, 500);
-    plot2->yAxis->setRange(-100, 100);
+    plot2->yAxis->setRange(-260, 260);
+    plot2->legend->setVisible(true);
 
     plot2->xAxis->setTickLabelType(QCPAxis::ltDateTime);
     plot2->xAxis->setDateTimeFormat("hh:mm:ss");
@@ -142,6 +141,8 @@ void MainWindow::readData(QByteArray * d)
     QList<QByteArray> list;
     bool ok;
     const int width = 5;
+    float tilt = 0;
+    float derror = 0;
 
     if( m.startsWith(':')){
         QList<QByteArray> l1 = m.split(':');
@@ -152,8 +153,8 @@ void MainWindow::readData(QByteArray * d)
     
     if (list.length() >= 3){
         int16_t pwm = ((int16_t)list[0].toInt(&ok, 16));
-        float tilt = list[2].toFloat();
-        float derror = list[1].toFloat();
+        tilt = list[2].toFloat();
+        derror = list[1].toFloat();
 
         this->plot2->graph(0)->addData(time, tilt);
         this->plot2->graph(0)->removeDataBefore(time-width);
@@ -183,6 +184,9 @@ void MainWindow::readData(QByteArray * d)
         this->plot->xAxis->setRange(time+0.25, width, Qt::AlignRight);
 
         if( (time - last_time) > 0.05){
+            this->plot->graph(0)->setName(QString("Duty Cycle: %1").arg(pwm, 5, 'd', 0, ' '));
+            this->plot2->graph(0)->setName(QString("Tilt: %1 [deg]").arg(tilt, 6, 'f', 2, ' '));
+            this->plot2->graph(1)->setName(QString("D error: %1 [deg/s]").arg(derror, 6, 'f', 2, ' '));
             this->plot->replot();
             this->plot2->replot();
             last_time = time;
