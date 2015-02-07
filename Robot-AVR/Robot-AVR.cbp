@@ -99,6 +99,10 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="pid.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pid.h" />
 		<Unit filename="pwm.c">
 			<Option compilerVar="CC" />
 		</Unit>
