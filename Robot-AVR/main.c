@@ -9,6 +9,7 @@
 #include "UART.h"
 #include "MPU6050.h"
 #include "pwm.h"
+#include "pid.h"
 
 #define ENVIAR_DATOS
 
@@ -94,6 +95,8 @@ int main(void)
     int16_t pwm, pwmb, pwm_cmp = 0;
     uint8_t err;
     uint8_t init = 1;
+    pid_Params_f pid;
+    float kc = 300, ti = 0, td = 0;
     // alpha = wc/(1/T0+wc)
     // wc = 1/T0*alpha/(1-alpha) = f0*alpha/(1-alpha)
     // wc = 200*0.02/0.98 = 4.08 rad/s = 0.64 Hz
@@ -129,6 +132,7 @@ int main(void)
     PORTB |= (1 << PIN0);
 
     UART0_sends("Holaa\n");
+    initPIDParams_f(&pid, kc, ti, td, 0, 0, 0x3ff, 0x3ff, t0);
     err = 0;
 
     while(1) {
@@ -160,15 +164,16 @@ int main(void)
                     pwm_cmp = 0;
                 }else{
                     error = 0 - tilt_r;
-                    pwm = kp*error + kd*derror;
+//                    pwm = kp*error + kd*derror;
+                    pwm = pid_loop_robot(&pid, error, derror);
                     pwm_cmp = deadBand_comp(pwm);
                 }
 
-                if (pwm_cmp > 0x3ff)
-                    pwm_cmp = 0x3ff;
-
-                if (pwm_cmp < -0x3ff)
-                    pwm_cmp = -0x3ff;
+//                if (pwm_cmp > 0x3ff)
+//                    pwm_cmp = 0x3ff;
+//
+//                if (pwm_cmp < -0x3ff)
+//                    pwm_cmp = -0x3ff;
 
                 pwmb = 0.89*pwm_cmp;
 
@@ -205,17 +210,21 @@ int main(void)
         if (update_ks){
             switch(update_ks){
                 case 1:
-                    kp = kpid;
+//                    kp = kpid;
+                    kc = kpid;
                     break;
                 case 2:
-                    ki = kpid;
+//                    ki = kpid;
+                    ti = kpid*0.01;
                     break;
                 case 3:
-                    kd = kpid;
+//                    kd = kpid;
+                    td = kpid*0.01;
                     break;
                 default:
                     break;
             }
+            updatePIDParams_f(&pid, kc, ti, td);
 //            sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
 //            UART0_sends(buf);
             update_ks = 0;

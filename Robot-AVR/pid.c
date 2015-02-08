@@ -1,74 +1,167 @@
 #include "pid.h"
 
-typedef struct _PID_PARAMS_F{
-    float Kc;
-    float Ki;
-    float Kd;
-    float T0;
-    float accInt;
-    float cv;
-    float max_cv;
-}pid_Params_f;
-
-typedef struct _PID_PARAMS_INT16{
-    int16_t Kc;
-    int16_t Ki;
-    int16_t Kd;
-    int16_t T0;
-    int16_t accInt;
-    int16_t cv;
-    int16_t max_cv;
-}pid_Params_int16;
-
 float pid_loop_f(pid_Params_f * pid, float err)
-    ek_0 = sp - yk_0 + yk_i;
-    pidLev.accInt += pidLev.Ki*ek_0;
-    if(pidLev.accInt > MAX_PWM){
-        pidLev.accInt = MAX_PWM;
-    }
-    #ifdef DIFF_PV
-    #warning derivada en PV
-    uk_0 =  pidLev.Kc*ek_0 + pidLev.accInt + pidLev.Kd*(yk_1 - yk_0);
-    #elif defined(DIFF_ERR)
-    #warning derivada en error
-    uk_0 = pidLev.Kc*ek_0 + pidLev.accInt + pidLev.Kd*(ek_0 - ek_1);
-    #else
-    #error Defina una forma de aproximacion a la derivada
-    #endif // DIFF_ERR
-    if(uk_0 > MAX_PWM){
-        OCR1A = MAX_PWM;
-        uk_0 = MAX_PWM;
-        LED2_ON();
-        LED1_OFF();
-    }else if(uk_0 < 0){
-        OCR1A = 0;
-        uk_0 = 0;
-        LED1_ON();
-        LED2_OFF();
-    }else{
-        OCR1A = (uint16_t)uk_0;
-        LED1_OFF();
-        LED2_OFF();
+{
+    float uk_1 = pid->uk;
+    if ( pid->max_error > 0 ){
+        if ( err > pid->max_error )
+            err = pid->max_error;
+        if ( err < -pid->max_error )
+            err = -pid->max_error;
     }
 
-    #ifdef DIFF_PV
-    yk_1 = yk_0;
-    #elif defined(DIFF_ERR)
-    ek_1 = ek_0;
-    #endif // DIFF_ERR
+    pid->accInt += pid->Ki*(err + pid->ek_1);
+
+    if ( pid->max_int > 0){
+        if ( pid->accInt > pid->max_int)
+            pid->accInt = pid->max_int;
+        if ( pid->accInt < -pid->max_int)
+            pid->accInt = -pid->max_int;
+    }
+    pid->uk = pid->Kc*err  + pid->accInt + pid->Kd*(err - pid->ek_1);
+
+    if( pid->max_duk > 0 ){
+        if ( (pid->uk - uk_1) > pid->max_duk)
+            pid->uk = uk_1 + pid->max_duk;
+        if ( (pid->uk - uk_1) < -pid->max_duk)
+            pid->uk = uk_1 - pid->max_duk;
+    }
+
+    if ( pid->max_uk > 0 ){
+        if ( pid->uk > pid->max_uk)
+            pid->uk = pid->max_uk;
+        if ( pid->uk < -pid->max_uk )
+            pid->uk = -pid->max_uk;
+    }
+    pid->ek_1 = err;
+    return pid->uk;
 }
 
-void updatePIDParams_f(pid_Params_f * pid, float kc, float Ti, float Td, float T0){
-    pid->Kc = kc*Kkc;
+float pid_loop_robot(pid_Params_f * pid, float ek, float dek)
+{
+    float uk_1 = pid->uk;
+    if ( pid->max_error > 0 ){
+        if ( ek > pid->max_error )
+            ek = pid->max_error;
+        if ( ek < -pid->max_error )
+            ek = -pid->max_error;
+    }
+
+    pid->accInt += pid->Ki*(ek + pid->ek_1);
+
+    if ( pid->max_int > 0){
+        if ( pid->accInt > pid->max_int)
+            pid->accInt = pid->max_int;
+        if ( pid->accInt < -pid->max_int)
+            pid->accInt = -pid->max_int;
+    }
+    pid->uk = pid->Kc*ek  + pid->accInt + pid->td*dek;
+
+    if( pid->max_duk > 0 ){
+        if ( (pid->uk - uk_1) > pid->max_duk)
+            pid->uk = uk_1 + pid->max_duk;
+        if ( (pid->uk - uk_1) < -pid->max_duk)
+            pid->uk = uk_1 - pid->max_duk;
+    }
+
+    if ( pid->max_uk > 0 ){
+        if ( pid->uk > pid->max_uk)
+            pid->uk = pid->max_uk;
+        if ( pid->uk < -pid->max_uk )
+            pid->uk = -pid->max_uk;
+    }
+    pid->ek_1 = ek;
+    return pid->uk;
+}
+
+float pid_loop_f_vel(pid_Params_f_vel * pid, float sp, float yk)
+{
+    float duk;
+    float ek = sp - yk;
+
+    if (pid->max_ek > 0){
+        if( ek > pid->max_ek){
+            ek = pid->max_ek;
+        }
+        if( ek < -pid->max_ek){
+            ek = -pid->max_ek;
+        }
+    }
+    duk = pid->q0*ek + pid->q1*pid->ek_1 + pid->q2*pid->ek_2 + pid->p0*yk + pid->p1*pid->yk_1 + pid->p2*pid->yk_2;
+
+    if (pid->max_duk > 0){
+        if ( duk > pid->max_duk){
+            duk = pid->max_duk;
+        }
+        if( duk < -pid->max_duk){
+            duk = -pid->max_duk;
+        }
+    }
+
+    pid->uk += duk;
+
+    if( pid->max_uk > 0){
+        if( pid->uk > pid->max_uk ){
+            pid->uk = pid->max_uk;
+        }
+
+        if( pid->uk < -pid->max_uk ){
+            pid->uk = -pid->max_uk;
+        }
+    }
+    pid->ek_2 = pid->ek_1;
+    pid->ek_1 = ek;
+
+    pid->yk_2 = pid->yk_1;
+    pid->yk_1 = yk;
+    return pid->uk;
+}
+
+void updatePIDParams_f(pid_Params_f * pid, float kc, float Ti, float Td)
+{
+    pid->Kc = kc;
     if(Ti == 0){
         pid->Ki = 0;
     }else{
-        pid->Ki = pid->Kc*T0/(2*Ti*KTi);
+        pid->Ki = kc*pid->T0/(2*Ti);
     }
-    pid->Kd = pid->Kc*Td*KTd/T0;
+    pid->Kd = kc*Td/pid->T0;
+    pid->td = Td;
 }
 
-void initPIDParams_f(uint8_t kc,uint8_t Ti,uint8_t Td, volatile pid_Params_f * pid){
+
+void updatePIDParams_f_vel(pid_Params_f_vel * pid, float kc, float Ti, float Td)
+{
+    // derivada en PV
+    pid->q0 = kc*(1+pid->T0/(2*Ti));
+    pid->q1 = kc*(pid->T0/(2*Ti) - 1);
+    pid->q2 = 0;
+    pid->p0 = -kc*Td/pid->T0;
+    pid->p1 = 2*kc*Td/pid->T0;
+    pid->p2 = pid->p0;
+}
+
+void initPIDParams_f(pid_Params_f * pid, float kc, float Ti, float Td, float max_du, float max_err, float max_u, float max_int, float T0)
+{
     pid->accInt = 0;
-    updatePIDParams(kc,Ti,Td,pid);
+    pid->ek_1 = 0;
+    pid->T0 = T0;
+    pid->max_duk = max_du;
+    pid->max_error = max_err;
+    pid->max_uk = max_u;
+    pid->max_int = max_int;
+    updatePIDParams_f(pid, kc,Ti,Td);
+}
+
+void initPIDParams_f_vel(pid_Params_f_vel * pid, float kc, float Ti, float Td, float max_du, float max_err, float max_u, float T0)
+{
+    pid->ek_1 = 0;
+    pid->ek_2 = 0;
+    pid->yk_1 = 0;
+    pid->yk_2 = 0;
+    pid->T0 = T0;
+    pid->max_duk = max_du;
+    pid->max_ek = max_err;
+    pid->max_uk = max_u;
+    updatePIDParams_f_vel(pid, kc,Ti,Td);
 }
