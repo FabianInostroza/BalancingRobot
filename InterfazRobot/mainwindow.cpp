@@ -18,20 +18,25 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << sp_list[0].portName();
     
     kp = new QSlider(Qt::Vertical);
-    //QSlider * ki = new QSlider(0, 0x7fff);
+    ki = new QSlider(Qt::Vertical);
     kd = new QSlider(Qt::Vertical);
-    kp->setMaximum(1500);
+    kp->setMaximum(0);
     kp->setMinimum(-1500);
-    kd->setMaximum(50);
-    kd->setMinimum(-50);
+    ki->setMaximum(15000);
+    ki->setMinimum(-15000);
+    kd->setMaximum(1000);
+    kd->setMinimum(-1000);
 
     lcd_kp = new QLCDNumber(this);
     lcd_kd = new QLCDNumber(this);
+    lcd_ki = new QLCDNumber(this);
 
     layout->addWidget(kp, 0, 1, 5, 1);
-    layout->addWidget(kd, 0, 2, 5, 1);
+    layout->addWidget(ki, 0, 2, 5, 1);
+    layout->addWidget(kd, 0, 3, 5, 1);
     layout->addWidget(lcd_kp, 5, 1, 1, 1);
-    layout->addWidget(lcd_kd, 5, 2, 1, 1);
+    layout->addWidget(lcd_ki, 5, 2, 1, 1);
+    layout->addWidget(lcd_kd, 5, 3, 1, 1);
 
     serial_thread = new QThread();
     //serialReader = new SerialComms("/dev/ttyUSB0", 115200);
@@ -45,11 +50,14 @@ MainWindow::MainWindow(QWidget *parent) :
     serial_thread->start();
 
     connect(kp, SIGNAL(valueChanged(int)), this, SLOT(setKp(int)));
+    connect(ki, SIGNAL(valueChanged(int)), this, SLOT(setKi(int)));
     connect(kd, SIGNAL(valueChanged(int)), this, SLOT(setKd(int)));
     connect(kp, SIGNAL(valueChanged(int)), this->lcd_kp, SLOT(display(int)));
+    connect(ki, SIGNAL(valueChanged(int)), this->lcd_ki, SLOT(display(int)));
     connect(kd, SIGNAL(valueChanged(int)), this->lcd_kd, SLOT(display(int)));
     connect(this, SIGNAL(updateKd(QByteArray)), serialReader, SLOT(write(const QByteArray)));
     connect(this, SIGNAL(updateKp(QByteArray)), serialReader, SLOT(write(const QByteArray)));
+    connect(this, SIGNAL(updateKi(QByteArray)), serialReader, SLOT(write(const QByteArray)));
 
     // desactiva antialias
     /*
@@ -148,6 +156,7 @@ void MainWindow::readData(QByteArray * d)
         QList<QByteArray> l1 = m.split(':');
         list = l1[1].split('\t');
     }else{
+        qDebug() << m;
         return;
     }
     
@@ -196,12 +205,22 @@ void MainWindow::readData(QByteArray * d)
 
 void MainWindow::setKp(int kp)
 {
-    QString msg = QString("p:%1:").arg(kp, 0, 16);
+    QString msg = QString("p:%1:").arg(kp, 4, 16);
+    msg.remove(2, msg.length()-4-3);
     emit this->updateKp(msg.toAscii());
 }
 
 void MainWindow::setKd(int kd)
 {
-    QString msg = QString("d:%1:").arg(kd, 0, 16);
+    QString msg = QString("d:%1:").arg(kd, 4, 16 );
+    msg.remove(2, msg.length()-4-3);
     emit this->updateKd(msg.toAscii());
+}
+
+void MainWindow::setKi(int ki)
+{
+    QString msg = QString("i:%1:").arg(ki, 4, 16);
+    msg.remove(2, msg.length()-4-3);
+    qDebug() << msg;
+    emit this->updateKi(msg.toAscii());
 }

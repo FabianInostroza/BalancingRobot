@@ -46,27 +46,27 @@ ISR(USART0_RX_vect)
                 default:
                     break;
             }
-            UDR0 = c;
+            //UDR0 = c;
             break;
         case 1:
             if (c >= '0' && c <= '9'){
                 tmp = tmp*16 + c - '0';
-                UDR0 = c;
+                //UDR0 = c;
             }else
             if ( c >= 'a' && c <= 'f'){
                 tmp = tmp*16 + c - 'a' + 10;
-                UDR0 = c;
+                //UDR0 = c;
             }else
             if ( c >= 'A' && c <= 'F'){
                 tmp = tmp*16 + c - 'A' + 10;
-                UDR0 = c;
+                //UDR0 = c;
             }else
             if ( c == ':' || c == '\n'){
                 st = 0;
                 update_ks = st2;
                 st2 = 0;
                 kpid = tmp;
-                UDR0 = '\n';
+                //UDR0 = '\n';
             }
             break;
         default:
@@ -96,7 +96,7 @@ int main(void)
     uint8_t err;
     uint8_t init = 1;
     pid_Params_f pid;
-    float kc = 300, ti = 0, td = 0;
+    float kc = -300, ti = 0, td = 0;
     // alpha = wc/(1/T0+wc)
     // wc = 1/T0*alpha/(1-alpha) = f0*alpha/(1-alpha)
     // wc = 200*0.02/0.98 = 4.08 rad/s = 0.64 Hz
@@ -169,13 +169,13 @@ int main(void)
                     pwm_cmp = deadBand_comp(pwm);
                 }
 
-//                if (pwm_cmp > 0x3ff)
-//                    pwm_cmp = 0x3ff;
-//
-//                if (pwm_cmp < -0x3ff)
-//                    pwm_cmp = -0x3ff;
+                if (pwm_cmp > 0x3ff)
+                    pwm_cmp = 0x3ff;
 
-                pwmb = 0.89*pwm_cmp;
+                if (pwm_cmp < -0x3ff)
+                    pwm_cmp = -0x3ff;
+
+                pwmb = 0.9*pwm_cmp;
 
                 if ( pwm_cmp < 0 ){
                     OCR1A = -pwm_cmp; // B-IA
@@ -226,7 +226,8 @@ int main(void)
             }
             updatePIDParams_f(&pid, kc, ti, td);
 //            sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
-//            UART0_sends(buf);
+            sprintf(buf, "%.2f\t%.2f\t%.2f\n", pid.Kc, pid.Ki, pid.td);
+            UART0_sends(buf);
             update_ks = 0;
         }
         wdt_reset();

@@ -29,6 +29,7 @@ protected slots:
 private slots:
     void setKp(int kp);
     void setKd(int kd);
+    void setKi(int ki);
 private:
     QDial * dial;
     QTimer * timer;
@@ -42,12 +43,16 @@ private:
     SerialComms * serialReader;
     QSlider * kp;
     QSlider * kd;
+    QSlider * ki;
     QLCDNumber * lcd_kp;
     QLCDNumber * lcd_kd;
+    QLCDNumber * lcd_ki;
 
 signals:
     void updateKp(QByteArray s);
     void updateKd(QByteArray s);
+    void updateKi(QByteArray s);
+
 };
 
 #endif // MAINWINDOW_H
