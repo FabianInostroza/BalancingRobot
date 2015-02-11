@@ -30,6 +30,7 @@ private slots:
     void setKp(int kp);
     void setKd(int kd);
     void setKi(int ki);
+    void setSp(int sp);
 private:
     QDial * dial;
     QTimer * timer;
@@ -44,14 +45,17 @@ private:
     QSlider * kp;
     QSlider * kd;
     QSlider * ki;
+    QSlider * sp;
     QLCDNumber * lcd_kp;
     QLCDNumber * lcd_kd;
     QLCDNumber * lcd_ki;
+    QLCDNumber * lcd_sp;
 
 signals:
     void updateKp(QByteArray s);
     void updateKd(QByteArray s);
     void updateKi(QByteArray s);
+    void updateSp(QByteArray s);
 
 };
 

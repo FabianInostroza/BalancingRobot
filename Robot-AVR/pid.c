@@ -55,7 +55,7 @@ float pid_loop_robot(pid_Params_f * pid, float ek, float dek)
         if ( pid->accInt < -pid->max_int)
             pid->accInt = -pid->max_int;
     }
-    pid->uk = pid->Kc*ek  + pid->accInt + pid->td*dek;
+    pid->uk = pid->Kc*ek  + pid->accInt + pid->Kd_r*dek;
 
     if( pid->max_duk > 0 ){
         if ( (pid->uk - uk_1) > pid->max_duk)
@@ -126,7 +126,7 @@ void updatePIDParams_f(pid_Params_f * pid, float kc, float Ti, float Td)
         pid->Ki = kc*pid->T0/(2*Ti);
     }
     pid->Kd = kc*Td/pid->T0;
-    pid->td = Td;
+    pid->Kd_r = Td*kc;
 }
 
 

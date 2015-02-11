@@ -12,7 +12,7 @@ typedef struct _PID_PARAMS_F{
     float Ki;
     float Kd;
     float T0;
-    float td;
+    float Kd_r;
     float accInt;
     float uk;
     float max_uk;

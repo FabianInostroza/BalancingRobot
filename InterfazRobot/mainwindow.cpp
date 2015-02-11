@@ -20,23 +20,29 @@ MainWindow::MainWindow(QWidget *parent) :
     kp = new QSlider(Qt::Vertical);
     ki = new QSlider(Qt::Vertical);
     kd = new QSlider(Qt::Vertical);
+    sp = new QSlider(Qt::Vertical);
     kp->setMaximum(0);
     kp->setMinimum(-1500);
     ki->setMaximum(15000);
     ki->setMinimum(-15000);
-    kd->setMaximum(1000);
-    kd->setMinimum(-1000);
+    kd->setMaximum(3000);
+    kd->setMinimum(-3000);
+    sp->setMaximum(200);
+    sp->setMinimum(-200);
 
     lcd_kp = new QLCDNumber(this);
     lcd_kd = new QLCDNumber(this);
     lcd_ki = new QLCDNumber(this);
+    lcd_sp = new QLCDNumber(this);
 
-    layout->addWidget(kp, 0, 1, 5, 1);
-    layout->addWidget(ki, 0, 2, 5, 1);
-    layout->addWidget(kd, 0, 3, 5, 1);
-    layout->addWidget(lcd_kp, 5, 1, 1, 1);
-    layout->addWidget(lcd_ki, 5, 2, 1, 1);
-    layout->addWidget(lcd_kd, 5, 3, 1, 1);
+    layout->addWidget(sp, 0, 1, 5, 1);
+    layout->addWidget(kp, 0, 2, 5, 1);
+    layout->addWidget(ki, 0, 3, 5, 1);
+    layout->addWidget(kd, 0, 4, 5, 1);
+    layout->addWidget(lcd_sp, 5, 1, 1, 1);
+    layout->addWidget(lcd_kp, 5, 2, 1, 1);
+    layout->addWidget(lcd_ki, 5, 3, 1, 1);
+    layout->addWidget(lcd_kd, 5, 4, 1, 1);
 
     serial_thread = new QThread();
     //serialReader = new SerialComms("/dev/ttyUSB0", 115200);
@@ -52,12 +58,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(kp, SIGNAL(valueChanged(int)), this, SLOT(setKp(int)));
     connect(ki, SIGNAL(valueChanged(int)), this, SLOT(setKi(int)));
     connect(kd, SIGNAL(valueChanged(int)), this, SLOT(setKd(int)));
-    connect(kp, SIGNAL(valueChanged(int)), this->lcd_kp, SLOT(display(int)));
-    connect(ki, SIGNAL(valueChanged(int)), this->lcd_ki, SLOT(display(int)));
-    connect(kd, SIGNAL(valueChanged(int)), this->lcd_kd, SLOT(display(int)));
+    connect(sp, SIGNAL(valueChanged(int)), this, SLOT(setSp(int)));
+    //connect(kp, SIGNAL(valueChanged(int)), this->lcd_kp, SLOT(display(int)));
+    //connect(ki, SIGNAL(valueChanged(int)), this->lcd_ki, SLOT(display(int)));
+    //connect(kd, SIGNAL(valueChanged(int)), this->lcd_kd, SLOT(display(int)));
     connect(this, SIGNAL(updateKd(QByteArray)), serialReader, SLOT(write(const QByteArray)));
     connect(this, SIGNAL(updateKp(QByteArray)), serialReader, SLOT(write(const QByteArray)));
     connect(this, SIGNAL(updateKi(QByteArray)), serialReader, SLOT(write(const QByteArray)));
+    connect(this, SIGNAL(updateSp(QByteArray)), serialReader, SLOT(write(const QByteArray)));
 
     // desactiva antialias
     /*
@@ -194,8 +202,8 @@ void MainWindow::readData(QByteArray * d)
 
         if( (time - last_time) > 0.05){
             this->plot->graph(0)->setName(QString("Duty Cycle: %1").arg(pwm, 5, 'd', 0, ' '));
-            this->plot2->graph(0)->setName(QString("Tilt: %1 [deg]").arg(tilt, 6, 'f', 2, ' '));
-            this->plot2->graph(1)->setName(QString("D error: %1 [deg/s]").arg(derror, 6, 'f', 2, ' '));
+            this->plot2->graph(0)->setName(QString("Tilt: %1 [deg]").arg(tilt, 7, 'f', 2, ' '));
+            this->plot2->graph(1)->setName(QString("D error: %1 [deg/s]").arg(derror, 7, 'f', 2, ' '));
             this->plot->replot();
             this->plot2->replot();
             last_time = time;
@@ -207,6 +215,7 @@ void MainWindow::setKp(int kp)
 {
     QString msg = QString("p:%1:").arg(kp, 4, 16);
     msg.remove(2, msg.length()-4-3);
+    this->lcd_kp->display(kp);
     emit this->updateKp(msg.toAscii());
 }
 
@@ -214,6 +223,7 @@ void MainWindow::setKd(int kd)
 {
     QString msg = QString("d:%1:").arg(kd, 4, 16 );
     msg.remove(2, msg.length()-4-3);
+    this->lcd_kd->display(kd*0.001);
     emit this->updateKd(msg.toAscii());
 }
 
@@ -221,6 +231,14 @@ void MainWindow::setKi(int ki)
 {
     QString msg = QString("i:%1:").arg(ki, 4, 16);
     msg.remove(2, msg.length()-4-3);
-    qDebug() << msg;
+    this->lcd_ki->display(ki*0.01);
     emit this->updateKi(msg.toAscii());
+}
+
+void MainWindow::setSp(int sp)
+{
+    QString msg = QString("s:%1:").arg(sp, 4, 16);
+    msg.remove(2, msg.length()-4-3);
+    this->lcd_sp->display(sp*0.01);
+    emit this->updateSp(msg.toAscii());
 }

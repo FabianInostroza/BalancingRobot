@@ -38,6 +38,10 @@ ISR(USART0_RX_vect)
                 case 'D':
                     st2 = 3;
                     break;
+                case 's':
+                case 'S':
+                    st2 = 4;
+                    break;
                 case ':':
                 case '\n':
                     st = 1;
@@ -109,6 +113,7 @@ int main(void)
     float tilt = 90, tilt_r = 90, derror = 0;
     int16_t kp = -300, ki = 0, kd = 0;
     float error = 0;
+    float sp_tilt = 0;
     uint8_t tmp;
 
     DDRB = (1 << PIN0);
@@ -141,7 +146,7 @@ int main(void)
 
             err |= mpu6050_burstReadWord(0x68, MPU6050_RA_FIFO_R_W, mpu_buf, 4);
 
-            tilt_r = atan2(mpu_buf[1], mpu_buf[2])*180/M_PI - 1.0;
+            tilt_r = atan2(mpu_buf[1], mpu_buf[2])*180/M_PI;
 
             if( init ){
                 init = 0;
@@ -163,7 +168,7 @@ int main(void)
                     pwm = 0;
                     pwm_cmp = 0;
                 }else{
-                    error = 0 - tilt_r;
+                    error = sp_tilt - tilt_r;
 //                    pwm = kp*error + kd*derror;
                     pwm = pid_loop_robot(&pid, error, derror);
                     pwm_cmp = deadBand_comp(pwm);
@@ -219,14 +224,17 @@ int main(void)
                     break;
                 case 3:
 //                    kd = kpid;
-                    td = kpid*0.01;
+                    td = kpid*0.001;
+                    break;
+                case 4:
+                    sp_tilt = kpid*0.01;
                     break;
                 default:
                     break;
             }
             updatePIDParams_f(&pid, kc, ti, td);
 //            sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
-            sprintf(buf, "%.2f\t%.2f\t%.2f\n", pid.Kc, pid.Ki, pid.td);
+            sprintf(buf, "%.2f\t%.2f\t%.2f\n", pid.Kc, pid.Ki, pid.Kd_r);
             UART0_sends(buf);
             update_ks = 0;
         }
