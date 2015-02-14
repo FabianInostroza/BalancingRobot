@@ -100,7 +100,7 @@ int main(void)
     uint8_t err;
     uint8_t init = 1;
     pid_Params_f pid;
-    float kc = -300, ti = 0, td = 0;
+    float kc = -300, ti = 0.1, td = 0.1;
     // alpha = wc/(1/T0+wc)
     // wc = 1/T0*alpha/(1-alpha) = f0*alpha/(1-alpha)
     // wc = 200*0.02/0.98 = 4.08 rad/s = 0.64 Hz
@@ -111,7 +111,7 @@ int main(void)
     //const float gyro_sens = 1/32.8; // +/-1000 deg/s
     const float gyro_k = gyro_sens*t0; // pal filtro complementario
     float tilt = 90, tilt_r = 90, derror = 0;
-    int16_t kp = -300, ki = 0, kd = 0;
+    int16_t kp = -300, ki = 0.1, kd = 0.1;
     float error = 0;
     float sp_tilt = 0;
     uint8_t tmp;
@@ -172,6 +172,7 @@ int main(void)
 //                    pwm = kp*error + kd*derror;
                     pwm = pid_loop_robot(&pid, error, derror);
                     pwm_cmp = deadBand_comp(pwm);
+                    //pwm_cmp = pwm;  //deadBand_comp(pwm);
                 }
 
                 if (pwm_cmp > 0x3ff)
@@ -180,7 +181,7 @@ int main(void)
                 if (pwm_cmp < -0x3ff)
                     pwm_cmp = -0x3ff;
 
-                pwmb = 0.9*pwm_cmp;
+                pwmb = 0.92*pwm_cmp;
 
                 if ( pwm_cmp < 0 ){
                     OCR1A = -pwm_cmp; // B-IA
