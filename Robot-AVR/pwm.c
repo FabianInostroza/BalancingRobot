@@ -21,9 +21,9 @@ void setup_pwm(void)
     ICR1 = 0x3FF;
     ICR3 = 0x3FF;
 
-    OCR1A = 0x1FF;
-    OCR1B = 0x1FF;
+    OCR1A = 0;
+    OCR1B = 0;
 
-    OCR3A = 0x1FF;
-    OCR3B = 0x1FF;
+    OCR3A = 0;
+    OCR3B = 0;
 }

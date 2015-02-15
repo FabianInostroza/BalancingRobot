@@ -11,7 +11,7 @@
 #include "pwm.h"
 #include "pid.h"
 
-#define ENVIAR_DATOS
+//#define ENVIAR_DATOS
 
 static volatile uint8_t data_ready = 0;
 static volatile uint8_t update_ks = 0;
@@ -41,6 +41,10 @@ ISR(USART0_RX_vect)
                 case 's':
                 case 'S':
                     st2 = 4;
+                    break;
+                case 'O':
+                case 'o':
+                    st2 = 5;
                     break;
                 case ':':
                 case '\n':
@@ -96,7 +100,8 @@ int main(void)
 {
     int16_t mpu_buf[6];
     char buf[30];
-    int16_t pwm, pwmb, pwm_cmp = 0;
+    int16_t pwm, pwmb=0, pwma = 0, pwm_cmp = 0;
+    int16_t pwm_offset = 0;
     uint8_t err;
     uint8_t init = 1;
     pid_Params_f pid;
@@ -128,7 +133,6 @@ int main(void)
     UART0_enRxInt(1);
 
     // activar el watchdog
-    //WDTCSR = (1 << WDE) | (1 << WDP2) | (1 << WDP1) | (1 << WDP0);
     wdt_enable(WDTO_250MS);
 
     sei();
@@ -169,30 +173,39 @@ int main(void)
                     pwm_cmp = 0;
                 }else{
                     error = sp_tilt - tilt_r;
-//                    pwm = kp*error + kd*derror;
+
                     pwm = pid_loop_robot(&pid, error, derror);
                     pwm_cmp = deadBand_comp(pwm);
-                    //pwm_cmp = pwm;  //deadBand_comp(pwm);
+                    //pwm_cmp = pwm;
                 }
 
-                if (pwm_cmp > 0x3ff)
-                    pwm_cmp = 0x3ff;
+                pwma = pwm_cmp + pwm_offset;
+                pwmb = 0.92*pwm_cmp - pwm_offset;
 
-                if (pwm_cmp < -0x3ff)
-                    pwm_cmp = -0x3ff;
+                if (pwma > 0x3ff)
+                    pwma = 0x3ff;
 
-                pwmb = 0.92*pwm_cmp;
+                if (pwma < -0x3ff)
+                    pwma = -0x3ff;
 
-                if ( pwm_cmp < 0 ){
-                    OCR1A = -pwm_cmp; // B-IA
+                if (pwmb > 0x3ff)
+                    pwmb = 0x3ff;
+
+                if (pwmb < -0x3ff)
+                    pwmb = -0x3ff;
+
+                if ( pwma < 0 ){
+                    OCR1A = -pwma; // B-IA
                     OCR1B = 0; // B-IB
+                }else{
+                    OCR1A = 0; // B-IA
+                    OCR1B = pwma; // B-IB
+                }
 
+                if ( pwmb < 0){
                     OCR3A = -pwmb; // A-IA
                     OCR3B = 0; // A-IB
                 }else{
-                    OCR1A = 0; // B-IA
-                    OCR1B = pwm_cmp; // B-IB
-
                     OCR3A = 0; // A-IA
                     OCR3B = pwmb; // A-IB
                 }
@@ -230,13 +243,18 @@ int main(void)
                 case 4:
                     sp_tilt = kpid*0.01;
                     break;
+                case 5:
+                    pwm_offset = kpid;
+                    break;
                 default:
                     break;
             }
             updatePIDParams_f(&pid, kc, ti, td);
 //            sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
+            #ifdef ENVIAR_DATOS
             sprintf(buf, "%.2f\t%.2f\t%.2f\n", pid.Kc, pid.Ki, pid.Kd_r);
             UART0_sends(buf);
+            #endif
             update_ks = 0;
         }
         wdt_reset();
