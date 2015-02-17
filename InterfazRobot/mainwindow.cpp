@@ -106,7 +106,7 @@ MainWindow::MainWindow(QWidget *parent) :
     plot2->addGraph();
     plot2->addGraph();
     plot2->graph(0)->setPen(QPen(Qt::red));
-    plot2->graph(0)->setName("Tilt: 0 [deg]");
+    plot2->graph(0)->setName("10*Tilt: 0 [deg]");
     plot2->graph(1)->setPen(QPen(Qt::blue));
     plot2->graph(1)->setName("D error: 0 [deg/s]");
     //plot->graph(0)->setBrush(QBrush(QColor(240, 255, 200)));
@@ -176,7 +176,7 @@ void MainWindow::readData(QByteArray * d)
     
     if (list.length() >= 3){
         int16_t pwm = ((int16_t)list[0].toInt(&ok, 16));
-        tilt = list[2].toFloat();
+        tilt = 10*list[2].toFloat();
         derror = list[1].toFloat();
 
         this->plot2->graph(0)->addData(time, tilt);
@@ -208,7 +208,7 @@ void MainWindow::readData(QByteArray * d)
 
         if( (time - last_time) > 0.05){
             this->plot->graph(0)->setName(QString("Duty Cycle: %1").arg(pwm, 5, 'd', 0, ' '));
-            this->plot2->graph(0)->setName(QString("Tilt: %1 [deg]").arg(tilt, 7, 'f', 2, ' '));
+            this->plot2->graph(0)->setName(QString("10*Tilt: %1 [deg]").arg(tilt, 7, 'f', 2, ' '));
             this->plot2->graph(1)->setName(QString("D error: %1 [deg/s]").arg(derror, 7, 'f', 2, ' '));
             this->plot->replot();
             this->plot2->replot();
