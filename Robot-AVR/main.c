@@ -10,12 +10,49 @@
 #include "MPU6050.h"
 #include "pwm.h"
 #include "pid.h"
+#include "spi.h"
+#include "XL7105.h"
 
-//#define ENVIAR_DATOS
+#define ENVIAR_DATOS
+#define USAR_XL7105
 
 static volatile uint8_t data_ready = 0;
 static volatile uint8_t update_ks = 0;
 static volatile int16_t kpid = 0;
+static volatile uint8_t enviar_datos = 0;
+
+typedef union{
+    struct{
+        uint8_t ID;
+        struct{
+            uint8_t left:1;
+            uint8_t down:1;
+            uint8_t right:1;
+            uint8_t up:1;
+            uint8_t start:1;
+            uint8_t R3:1;
+            uint8_t L3:1;
+            uint8_t select:1;
+            // 2do byte
+            uint8_t square:1;
+            uint8_t X:1;
+            uint8_t circle:1;
+            uint8_t triangle:1;
+            uint8_t R1:1;
+            uint8_t L1:1;
+            uint8_t R2:1;
+            uint8_t L2:1;
+        }buttons;
+        struct {
+            int8_t RX;
+            int8_t RY;
+            int8_t LX;
+            int8_t LY;
+        }analog;
+    }PS2;
+    uint8_t ubytes[7];
+    int8_t sbytes[7];
+}PS2_joy;
 
 ISR(USART0_RX_vect)
 {
@@ -45,6 +82,12 @@ ISR(USART0_RX_vect)
                 case 'O':
                 case 'o':
                     st2 = 5;
+                    break;
+                case 'T':
+                    enviar_datos = 1;
+                    break;
+                case 't':
+                    enviar_datos = 0;
                     break;
                 case ':':
                 case '\n':
@@ -99,13 +142,13 @@ inline int16_t deadBand_comp(int16_t x)
 int main(void)
 {
     int16_t mpu_buf[6];
-    char buf[30];
     int16_t pwm, pwmb=0, pwma = 0, pwm_cmp = 0;
     int16_t pwm_offset = 0;
     uint8_t err;
     uint8_t init = 1;
     pid_Params_f pid;
-    float kc = -300, ti = 0.1, td = 0.1;
+    //float kc = -300, ti = 0.1, td = 0.1; // con 2*3.7v
+    float kc = -170, ti = 0.1, td = 0.135; // con 3*3.7v
     // alpha = wc/(1/T0+wc)
     // wc = 1/T0*alpha/(1-alpha) = f0*alpha/(1-alpha)
     // wc = 200*0.02/0.98 = 4.08 rad/s = 0.64 Hz
@@ -116,10 +159,22 @@ int main(void)
     //const float gyro_sens = 1/32.8; // +/-1000 deg/s
     const float gyro_k = gyro_sens*t0; // pal filtro complementario
     float tilt = 90, tilt_r = 90, derror = 0;
-    int16_t kp = -300, ki = 0.1, kd = 0.1;
     float error = 0;
     float sp_tilt = 0;
-    uint8_t tmp;
+
+    #ifdef ENVIAR_DATOS
+    char buf[30];
+    #endif
+
+    #ifdef USAR_XL7105
+    uint8_t xl7105_ok = 0;
+    uint8_t xl7105_cnt = 0;
+    setup_spi();
+
+    xl7105_ok = setup_xl7105();
+
+    PS2_joy joy;
+    #endif // USAR_XL7105
 
     DDRB = (1 << PIN0);
 
@@ -138,7 +193,8 @@ int main(void)
     sei();
 
     //PINC |= (1 << PIN0) | (1 << PIN1);
-    PORTB |= (1 << PIN0);
+    if ( err == 0 && xl7105_ok == 0)
+        PORTB |= (1 << PIN0);
 
     UART0_sends("Holaa\n");
     initPIDParams_f(&pid, kc, ti, td, 0, 0, 0x3ff, 0x3ff, t0);
@@ -175,12 +231,12 @@ int main(void)
                     error = sp_tilt - tilt_r;
 
                     pwm = pid_loop_robot(&pid, error, derror);
-                    pwm_cmp = deadBand_comp(pwm);
-                    //pwm_cmp = pwm;
+                    //pwm_cmp = deadBand_comp(pwm);
+                    pwm_cmp = pwm;
                 }
 
-                pwma = pwm_cmp + pwm_offset;
-                pwmb = 0.92*pwm_cmp - pwm_offset;
+                pwma = pwm_cmp - pwm_offset;
+                pwmb = 0.92*(pwm_cmp + pwm_offset);
 
                 if (pwma > 0x3ff)
                     pwma = 0x3ff;
@@ -211,19 +267,39 @@ int main(void)
                 }
 
     #ifdef ENVIAR_DATOS
-                UART0_Tx(':');
-                UART0_send_hex16(pwm_cmp);
-                UART0_Tx('\t');
-    //            UART0_send_hex16(mpu_buf[2]);
-    //            UART0_Tx('\t');
-    //            UART0_send_hex16(mpu_buf[3]);
-    //            UART0_Tx('\t');
-                sprintf(buf, "%.2f\t%.2f\n", derror, tilt);
-    ////            sprintf(buf, "%i\t%.2X\n", mpu_buf[3], err);
-                UART0_sends(buf);
+                if( enviar_datos ){
+                    UART0_Tx(':');
+                    UART0_send_hex16(pwm_cmp);
+                    UART0_Tx('\t');
+        //            UART0_send_hex16(mpu_buf[2]);
+        //            UART0_Tx('\t');
+        //            UART0_send_hex16(mpu_buf[3]);
+        //            UART0_Tx('\t');
+                    sprintf(buf, "%.2f\t%.2f\n", derror, tilt);
+        ////            sprintf(buf, "%i\t%.2X\n", mpu_buf[3], err);
+                    UART0_sends(buf);
+                }
     #endif
                 //UART0_sends("hah\n");
             }
+
+            #ifdef USAR_XL7105
+            if ( xl7105_ok == 0){
+                if( xl7105_rx(joy.ubytes, 7, 1) ){
+                    xl7105_cnt = 0;
+                    if ( joy.PS2.buttons.R1 )
+                        pwm_offset = joy.PS2.analog.RX*3;
+                    else
+                        pwm_offset = joy.PS2.analog.RX*5;
+                    if ( joy.PS2.buttons.L1 )
+                        sp_tilt = joy.PS2.analog.LY*0.013;
+                    else
+                        sp_tilt = joy.PS2.analog.LY*0.018;
+                }else{
+                    xl7105_cnt++;
+                }
+            }
+            #endif // USAR_XL7105
         }
 
         if (update_ks){
@@ -252,8 +328,10 @@ int main(void)
             updatePIDParams_f(&pid, kc, ti, td);
 //            sprintf(buf, "%i\t%i\t%i\n", kp, ki, kd);
             #ifdef ENVIAR_DATOS
-            sprintf(buf, "%.2f\t%.2f\t%.2f\n", pid.Kc, pid.Ki, pid.Kd_r);
-            UART0_sends(buf);
+            if( enviar_datos ){
+                sprintf(buf, "%.2f\t%.2f\t%.2f\n", pid.Kc, pid.Ki, pid.Kd_r);
+                UART0_sends(buf);
+            }
             #endif
             update_ks = 0;
         }

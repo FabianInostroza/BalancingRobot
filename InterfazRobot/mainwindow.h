@@ -52,10 +52,11 @@ private:
     QLCDNumber * lcd_sp;
 
 signals:
-    void updateKp(QByteArray s);
-    void updateKd(QByteArray s);
-    void updateKi(QByteArray s);
-    void updateSp(QByteArray s);
+    //void updateKp(QByteArray s);
+    //void updateKd(QByteArray s);
+    //void updateKi(QByteArray s);
+    //void updateSp(QByteArray s);
+    void enviar(QByteArray s);
 
 };
 

@@ -63,6 +63,8 @@
 # ejecutables
 MPU6050/Interfaz/MPU6050/MPU6050
 InterfazRobot/InterfazRobot
+MPU6050/Interfaz/MPU6050/Makefile
+MPU6050/MPU6050-AVR/bin/
 
 # qt
 moc_*.cpp

@@ -10,6 +10,7 @@ class SerialComms : public QObject
 public:
     explicit SerialComms(QObject *parent = 0);
     explicit SerialComms(QString sp, qint32 baud, QObject *parent = 0);
+    ~SerialComms();
     void setPortName(QString);
     void open(QString, qint32);
     int open();

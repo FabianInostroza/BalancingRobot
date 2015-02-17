@@ -24,6 +24,15 @@ SerialComms::SerialComms(QString sp, qint32 baud, QObject *parent) :
     nStop = 1;
 }
 
+SerialComms::~SerialComms()
+{
+	if (this->m_serialPort){
+		if( this->m_serialPort->isOpen() )
+			this->m_serialPort->close();
+		delete this->m_serialPort;
+	}
+}
+
 void SerialComms::setPortName(QString portName)
 {
     //this->m_serialPort.setPortName(portName);
@@ -76,7 +85,9 @@ void SerialComms::start()
     if (this->m_serialPort->open(QIODevice::ReadWrite)) {
         this->m_serialPort->flush();
         connect(this->m_serialPort, SIGNAL(readyRead()), this, SLOT(readData()));
-    }
+    }else{
+		qDebug() << "No se pudo abrir el puerto " + this->portName ;
+	}
 //    if (this->m_serialPort->open(QIODevice::ReadWrite)){
 //        while(this->nStop){
 //            if( this->m_serialPort->canReadLine()){

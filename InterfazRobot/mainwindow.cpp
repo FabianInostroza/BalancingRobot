@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     layout->addWidget(lcd_kd, 5, 4, 1, 1);
 
     serial_thread = new QThread();
-    //serialReader = new SerialComms("/dev/ttyUSB0", 115200);
+    //serialReader = new SerialComms("/dev/pts/2", 115200);
     serialReader = new SerialComms("/dev/" + sp_list[0].portName(), 115200);
     serialReader->moveToThread(serial_thread);
     connect(serialReader, SIGNAL(finished()), serial_thread, SLOT(quit()));
@@ -62,10 +62,12 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(kp, SIGNAL(valueChanged(int)), this->lcd_kp, SLOT(display(int)));
     //connect(ki, SIGNAL(valueChanged(int)), this->lcd_ki, SLOT(display(int)));
     //connect(kd, SIGNAL(valueChanged(int)), this->lcd_kd, SLOT(display(int)));
-    connect(this, SIGNAL(updateKd(QByteArray)), serialReader, SLOT(write(const QByteArray)));
-    connect(this, SIGNAL(updateKp(QByteArray)), serialReader, SLOT(write(const QByteArray)));
-    connect(this, SIGNAL(updateKi(QByteArray)), serialReader, SLOT(write(const QByteArray)));
-    connect(this, SIGNAL(updateSp(QByteArray)), serialReader, SLOT(write(const QByteArray)));
+    
+    //connect(this, SIGNAL(updateKd(QByteArray)), serialReader, SLOT(write(const QByteArray)));
+    //connect(this, SIGNAL(updateKp(QByteArray)), serialReader, SLOT(write(const QByteArray)));
+    //connect(this, SIGNAL(updateKi(QByteArray)), serialReader, SLOT(write(const QByteArray)));
+    //connect(this, SIGNAL(updateSp(QByteArray)), serialReader, SLOT(write(const QByteArray)));
+    connect(this, SIGNAL(enviar(QByteArray)), serialReader, SLOT(write(const QByteArray)));
 
     // desactiva antialias
     /*
@@ -130,8 +132,10 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     qDebug("chao");
+    this->serialReader->write("t");
     this->serialReader->stop();
-    this->serial_thread->quit();
+    //this->serial_thread->quit();
+    //this->serial_thread->wait();
     delete layout;
     delete plot;
     delete plot2;
@@ -164,6 +168,8 @@ void MainWindow::readData(QByteArray * d)
         QList<QByteArray> l1 = m.split(':');
         list = l1[1].split('\t');
     }else{
+		if (m == "Holaa")
+			emit enviar("T");
         qDebug() << m;
         return;
     }
@@ -216,7 +222,7 @@ void MainWindow::setKp(int kp)
     QString msg = QString("p:%1:").arg(kp, 4, 16);
     msg.remove(2, msg.length()-4-3);
     this->lcd_kp->display(kp);
-    emit this->updateKp(msg.toAscii());
+    emit enviar(msg.toAscii());
 }
 
 void MainWindow::setKd(int kd)
@@ -224,7 +230,7 @@ void MainWindow::setKd(int kd)
     QString msg = QString("d:%1:").arg(kd, 4, 16 );
     msg.remove(2, msg.length()-4-3);
     this->lcd_kd->display(kd*0.001);
-    emit this->updateKd(msg.toAscii());
+    emit enviar(msg.toAscii());
 }
 
 void MainWindow::setKi(int ki)
@@ -232,7 +238,7 @@ void MainWindow::setKi(int ki)
     QString msg = QString("i:%1:").arg(ki, 4, 16);
     msg.remove(2, msg.length()-4-3);
     this->lcd_ki->display(ki*0.01);
-    emit this->updateKi(msg.toAscii());
+    emit enviar(msg.toAscii());
 }
 
 void MainWindow::setSp(int sp)
@@ -240,5 +246,5 @@ void MainWindow::setSp(int sp)
     QString msg = QString("s:%1:").arg(sp, 4, 16);
     msg.remove(2, msg.length()-4-3);
     this->lcd_sp->display(sp*0.01);
-    emit this->updateSp(msg.toAscii());
+    emit enviar(msg.toAscii());
 }
