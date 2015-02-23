@@ -15,7 +15,8 @@ def int2hex16(i):
         n = i
     return '%x'%n
 
-with serial.Serial('/dev/ttyUSB0', 115200) as ser:
+#with serial.Serial('/dev/ttyUSB0', 115200) as ser:
+with serial.Serial('/dev/rfcomm0', 115200) as ser:
     ser.flush()
     i = 0
     ax = 0

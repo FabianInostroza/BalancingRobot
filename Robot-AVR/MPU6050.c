@@ -11,7 +11,8 @@ uint8_t setupMPU6050(uint8_t addr)
     _delay_ms(20);
     err |= mpu6050_writeReg(addr, MPU6050_RA_PWR_MGMT_1, 0);
     _delay_ms(1);
-    err |= mpu6050_writeReg(addr, MPU6050_RA_CONFIG, 1);
+    //err |= mpu6050_writeReg(addr, MPU6050_RA_CONFIG, 1); // BW accel 184, BW gyro 188
+    err |= mpu6050_writeReg(addr, MPU6050_RA_CONFIG, 2); // BW accel 94, BW gyro 98
     //err = mpu6050_writeReg(addr, MPU6050_RA_SMPLRT_DIV, 3); // 250Hz
     err |= mpu6050_writeReg(addr, MPU6050_RA_SMPLRT_DIV, 4); // 200Hz
     //err |= mpu6050_writeReg(addr, MPU6050_RA_SMPLRT_DIV, 9); // 100Hz
@@ -23,7 +24,8 @@ uint8_t setupMPU6050(uint8_t addr)
     err = mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0); // +/-250 deg/s
     // activar pruebas del acelerometro, rango = +/-8g
     //err = mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x10);
-    err |= mpu6050_setAccelOffsets(0x68, (2), (-40), (1756-2048));
+    //err |= mpu6050_setAccelOffsets(0x68, (2), (-40), (1756-2048));
+    err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (-24), (-303));
     err |= mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x0); // +/-2g
     // activar fifo para giroscopios y acelerometro
     //err |= mpu6050_writeReg(addr, MPU6050_RA_FIFO_EN, 0x78);
@@ -134,7 +136,7 @@ uint8_t mpu6050_setAccelOffsets(uint8_t addr, int16_t ax, int16_t ay, int16_t az
 
     if ( (err = mpu6050_burstWriteWord(addr, MPU6050_RA_XA_OFFS_H, offsets, 3) ) )
         return err;
-
+    return 0;
 }
 
 uint8_t mpu6050_setGyroOffsets(uint8_t addr, int16_t gx, int16_t gy, int16_t gz)

@@ -27,7 +27,7 @@ uint8_t setupMPU6050(uint8_t addr)
     err |= mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x18); // +/-16g
     // offset son los valores leidos con el acelerometro estatico
     // con rango +/-16g
-    //err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (96), (-382));
+    err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (-24), (-303));
     //err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (135), (-308));
     //err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (135), (-284));
     //err |= mpu6050_setAccelOffsets(0x68, 0, 0, -622);
