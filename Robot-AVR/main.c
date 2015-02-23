@@ -164,6 +164,7 @@ int main(void)
     float tilt = 90, tilt_r = 90, derror = 0;
     float error = 0;
     float sp_tilt = 0;
+    uint8_t reset_sps = 1;
 
     #ifdef ENVIAR_DATOS
     char buf[30];
@@ -221,13 +222,13 @@ int main(void)
 
                 tilt_r = tilt;
 
-                if (tilt_r >= 5) {
-                    tilt_r = 5;
+                if (tilt_r >= 10) {
+                    tilt_r = 10;
                 }
-                if ( tilt_r <= -5)
-                    tilt_r = -5;
+                if ( tilt_r <= -10)
+                    tilt_r = -10;
 
-                if ( tilt >= 30.0 || tilt <= -30.0){
+                if ( tilt >= 40.0 || tilt <= -40.0){
                     pwm = 0;
                     pwm_cmp = 0;
                 }else{
@@ -238,8 +239,8 @@ int main(void)
                     pwm_cmp = pwm;
                 }
 
-                pwma = pwm_cmp - pwm_offset;
-                pwmb = 0.92*(pwm_cmp + pwm_offset);
+                pwma = 0.92*(pwm_cmp + pwm_offset);
+                pwmb = pwm_cmp - pwm_offset;
 
                 if (pwma > 0x3ff)
                     pwma = 0x3ff;
@@ -254,19 +255,19 @@ int main(void)
                     pwmb = -0x3ff;
 
                 if ( pwma < 0 ){
-                    OCR1A = -pwma; // B-IA
-                    OCR1B = 0; // B-IB
+                    OCR3A = -pwma; // B-IA
+                    OCR3B = 0; // B-IB
                 }else{
-                    OCR1A = 0; // B-IA
-                    OCR1B = pwma; // B-IB
+                    OCR3A = 0; // B-IA
+                    OCR3B = pwma; // B-IB
                 }
 
                 if ( pwmb < 0){
-                    OCR3A = -pwmb; // A-IA
-                    OCR3B = 0; // A-IB
+                    OCR1A = -pwmb; // A-IA
+                    OCR1B = 0; // A-IB
                 }else{
-                    OCR3A = 0; // A-IA
-                    OCR3B = pwmb; // A-IB
+                    OCR1A = 0; // A-IA
+                    OCR1B = pwmb; // A-IB
                 }
 
     #ifdef ENVIAR_DATOS
@@ -298,8 +299,23 @@ int main(void)
                         sp_tilt = joy.PS2.analog.LY*0.013;
                     else
                         sp_tilt = joy.PS2.analog.LY*0.018;
+
+                    reset_sps = 1;
+                    xl7105_cnt = 0;
                 }else{
                     xl7105_cnt++;
+                    // si no se recibe paquetes de datos
+                    // mas de 40 veces (aprox 0.2s en un loop de 200Hz)
+                    // , asumir que el mando
+                    // esta apagado o fuera de alcance y
+                    // resetear los setpoint y offset
+                    if (xl7105_cnt >= 39){
+                        if( reset_sps ){
+                            sp_tilt = 0;
+                            pwm_offset = 0;
+                            reset_sps = 0;
+                        }
+                    }
                 }
             }
             #endif // USAR_XL7105
