@@ -23,8 +23,9 @@ void setupTWI(void)
 uint8_t twi_start(uint8_t addr, uint8_t w)
 {
     uint8_t tw_st;
+    uint8_t timeout = 0;
     TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN); // enviar START
-    while( !(TWCR & (1 << (TWINT) ) ) ); // esperar a que se envie el START
+    while( !(TWCR & (1 << (TWINT) ) ) && timeout++ < 255 ); // esperar a que se envie el START
     // si se envio correctamente el START, continuar
     tw_st = TWSR & 0xF8;
     // verificar si se envio correctamente el start
@@ -38,7 +39,9 @@ uint8_t twi_start(uint8_t addr, uint8_t w)
     TWDR = (addr << 1) | w; // cargar la direccion del esclavo
     TWCR = (1 << TWINT) | (1 << TWEN); // enviar la direccion
 
-    while( !(TWCR & (1 << (TWINT) ) ) ); // esperar a que se envie la direccion
+    timeout = 0;
+
+    while( !(TWCR & (1 << (TWINT) ) ) && timeout++ < 255 ); // esperar a que se envie la direccion
 
     tw_st = TWSR & 0xF8;
     // verificar si el esclavo responde la solicitud
@@ -59,10 +62,11 @@ void twi_stop(void)
 inline uint8_t twi_write(uint8_t d)
 {
     uint8_t tw_st;
+    uint8_t timeout = 0;
     TWDR = d; // cargar los datos
     TWCR = (1 << TWINT) | (1 << TWEN); // enviar los datos
 
-    while( !(TWCR & (1 << (TWINT) ) ) ); // esperar a que se envien los datos
+    while( !(TWCR & (1 << (TWINT) ) ) && timeout++ < 255 ); // esperar a que se envien los datos
 
     // si se envio correctamente los datos, continuar
     tw_st = TWSR & 0xF8;
@@ -73,10 +77,15 @@ inline uint8_t twi_write(uint8_t d)
 
 uint8_t twi_send(uint8_t sl_addr, uint8_t * data, uint8_t n)
 {
+    uint8_t i = 0, err = 0;
     twi_start(sl_addr, 1);
 
-    while (n--){
-        twi_write(data[n]);
+    for( i = 0; i < n; i++){
+        err = twi_write(data[i]);
+        if( err ){
+            twi_stop();
+            return err;
+        }
     }
 
     twi_stop();
@@ -86,10 +95,11 @@ uint8_t twi_send(uint8_t sl_addr, uint8_t * data, uint8_t n)
 
 inline uint8_t twi_read(uint8_t ack)
 {
+    uint8_t timeout = 0;
     if (ack)
         TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
     else
         TWCR = (1 << TWINT) | (1 << TWEN);
-    while( !( TWCR & (1 << TWINT)) );
+    while( !( TWCR & (1 << TWINT)) && timeout++ < 255 );
     return TWDR;
 }
