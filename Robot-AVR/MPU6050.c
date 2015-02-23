@@ -6,11 +6,15 @@
 uint8_t setupMPU6050(uint8_t addr)
 {
     uint8_t err = 0;
+    uint8_t addr_r;
     setupTWI();
     err = mpu6050_writeReg(addr, MPU6050_RA_PWR_MGMT_1, 0x80); // reset
     _delay_ms(20);
     err |= mpu6050_writeReg(addr, MPU6050_RA_PWR_MGMT_1, 0);
     _delay_ms(1);
+    err |= mpu6050_readReg(addr, MPU6050_RA_WHO_AM_I, &addr_r );
+    if( err || addr != addr_r )
+        return -1;
     //err |= mpu6050_writeReg(addr, MPU6050_RA_CONFIG, 1); // BW accel 184, BW gyro 188
     err |= mpu6050_writeReg(addr, MPU6050_RA_CONFIG, 2); // BW accel 94, BW gyro 98
     //err = mpu6050_writeReg(addr, MPU6050_RA_SMPLRT_DIV, 3); // 250Hz
@@ -21,7 +25,7 @@ uint8_t setupMPU6050(uint8_t addr)
     err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0x10);// +/- 1000 deg/s
     err |= mpu6050_gyroCal(addr);
     //err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0x08);// +/-500 deg/s
-    err = mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0); // +/-250 deg/s
+    err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0); // +/-250 deg/s
     // activar pruebas del acelerometro, rango = +/-8g
     //err = mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x10);
     //err |= mpu6050_setAccelOffsets(0x68, (2), (-40), (1756-2048));
@@ -69,7 +73,7 @@ uint8_t mpu6050_gyroCal(uint8_t addr)
         _delay_ms(5);
     }
 
-    for( i = 0; i < 0x100; i++){
+    for( i = 0; i < 0x80; i++){
         if( mpu6050_readGyro(addr, &gx, &gy, &gz) )
             return -1;
         offsets[0] += gx;
@@ -78,9 +82,9 @@ uint8_t mpu6050_gyroCal(uint8_t addr)
         _delay_ms(5);
     }
 
-    offsets[0] /= 0x100;
-    offsets[1] /= 0x100;
-    offsets[2] /= 0x100;
+    offsets[0] /= 0x80;
+    offsets[1] /= 0x80;
+    offsets[2] /= 0x80;
 
     mpu6050_setGyroOffsets(addr, -gx, -gy, -gz);
     return 0;
@@ -294,4 +298,13 @@ uint8_t mpu6050_burstWriteWord(uint8_t addr, uint8_t reg, int16_t * data, uint8_
 
     twi_stop();
     return 0;
+}
+
+uint8_t mpu6050_resetFifo(uint8_t addr)
+{
+    uint8_t err = 0;
+    err |= mpu6050_writeReg(addr, MPU6050_RA_USER_CTRL, 0x04); // desactivar fifo
+    err |= mpu6050_writeReg(addr, MPU6050_RA_USER_CTRL, 0x04); // resetear fifo
+    err |= mpu6050_writeReg(addr, MPU6050_RA_USER_CTRL, 0x40); // activar fifo
+    return err;
 }
