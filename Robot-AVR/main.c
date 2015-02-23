@@ -182,17 +182,34 @@ int main(void)
 
     DDRB = (1 << PIN0);
 
+    // activar el watchdog
+    // despues se reconfigura para
+    // un tiempo mas pequeno
+    wdt_enable(WDTO_2S);
+
     err = setupMPU6050(0x68);
+
+    wdt_disable();
+
+    // si falla la inicializacion no continuar
+    // y parpadear el led
+    if( err ){
+        while(1){
+            PINB = 0x01;
+            _delay_ms(200);
+        }
+    }
 
     EICRA = (1 << ISC21); // interrupcion INT2 falling edge
     EIMSK = (1 << INT2); // activar interrupcion INT2
 
     setup_pwm();
-    setupUART0(1, 1);
-    UART0_enRxInt(1);
 
     // activar el watchdog
     wdt_enable(WDTO_250MS);
+
+    setupUART0(1, 1);
+    UART0_enRxInt(1);
 
     sei();
 
@@ -204,16 +221,21 @@ int main(void)
     initPIDParams_f(&pid, kc, ti, td, 0, 0, 0x3ff, 0x3ff, t0);
     err = 0;
 
+    // para no leer basura a la primera
+    mpu6050_resetFifo(0x68);
+    data_ready = 0;
+
     while(1) {
         if( data_ready ){
             data_ready = 0;
 
-            err |= mpu6050_burstReadWord(0x68, MPU6050_RA_FIFO_R_W, mpu_buf, 4);
+            err = mpu6050_burstReadWord(0x68, MPU6050_RA_FIFO_R_W, mpu_buf, 4);
 
             tilt_r = atan2(mpu_buf[1], mpu_buf[2])*180/M_PI;
 
             if( init ){
-                init = 0;
+                if( err == 0 )
+                    init = 0;
                 tilt = tilt_r;
             }else{
                 tilt = (1.0-alpha)*(tilt + mpu_buf[3]*gyro_k) + alpha*tilt_r;
@@ -270,32 +292,32 @@ int main(void)
                     OCR1B = pwmb; // A-IB
                 }
 
-    #ifdef ENVIAR_DATOS
-                if( enviar_datos ){
-                    UART0_Tx(':');
-                    UART0_send_hex16(pwm_cmp);
-                    UART0_Tx('\t');
-        //            UART0_send_hex16(mpu_buf[2]);
-        //            UART0_Tx('\t');
-        //            UART0_send_hex16(mpu_buf[3]);
-        //            UART0_Tx('\t');
-                    sprintf(buf, "%.2f\t%.2f\n", derror, tilt);
-        ////            sprintf(buf, "%i\t%.2X\n", mpu_buf[3], err);
-                    UART0_sends(buf);
-                }
-    #endif
-                //UART0_sends("hah\n");
             }
+
+            #ifdef ENVIAR_DATOS
+            if( enviar_datos){
+                UART0_Tx(':');
+                UART0_send_hex16(pwm_cmp);
+                UART0_Tx('\t');
+    //            UART0_send_hex16(mpu_buf[2]);
+    //            UART0_Tx('\t');
+    //            UART0_send_hex16(mpu_buf[3]);
+    //            UART0_Tx('\t');
+                sprintf(buf, "%.2f\t%.2f\n", derror, tilt);
+    ////            sprintf(buf, "%i\t%.2X\n", mpu_buf[3], err);
+                UART0_sends(buf);
+            }
+            #endif
 
             #ifdef USAR_XL7105
             if ( xl7105_ok == 0){
                 if( xl7105_rx(joy.ubytes, 7, 1) ){
                     xl7105_cnt = 0;
-                    if ( joy.PS2.buttons.R1 )
+                    if ( joy.PS2.buttons.R1 ) // boton no presionado
                         pwm_offset = joy.PS2.analog.RX*3;
                     else
                         pwm_offset = joy.PS2.analog.RX*5;
-                    if ( joy.PS2.buttons.L1 )
+                    if ( joy.PS2.buttons.L1 ) // boton no presionado
                         sp_tilt = joy.PS2.analog.LY*0.013;
                     else
                         sp_tilt = joy.PS2.analog.LY*0.018;
