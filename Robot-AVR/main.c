@@ -164,7 +164,6 @@ int main(void)
     float tilt = 90, tilt_r = 90, derror = 0;
     float error = 0;
     float sp_tilt = 0;
-    uint8_t reset_sps = 1;
 
     #ifdef ENVIAR_DATOS
     char buf[30];
@@ -173,11 +172,15 @@ int main(void)
     #ifdef USAR_XL7105
     uint8_t xl7105_ok = 0;
     uint8_t xl7105_cnt = 0;
+    uint8_t reset_sps = 1;
     setup_spi();
 
     xl7105_ok = setup_xl7105();
 
     PS2_joy joy;
+    uint8_t modo_joy = 2;
+    #else
+    uint8_t xl7105_ok = 0;
     #endif // USAR_XL7105
 
     DDRB = (1 << PIN0);
@@ -313,14 +316,46 @@ int main(void)
             if ( xl7105_ok == 0){
                 if( xl7105_rx(joy.ubytes, 7, 1) ){
                     xl7105_cnt = 0;
-                    if ( joy.PS2.buttons.R1 ) // boton no presionado
-                        pwm_offset = joy.PS2.analog.RX*3;
-                    else
-                        pwm_offset = joy.PS2.analog.RX*5;
-                    if ( joy.PS2.buttons.L1 ) // boton no presionado
-                        sp_tilt = joy.PS2.analog.LY*0.013;
-                    else
-                        sp_tilt = joy.PS2.analog.LY*0.018;
+                    if( modo_joy == 0){ // solo joystick izquierdo
+                        if ( joy.PS2.buttons.R1 ) // boton no presionado
+                            pwm_offset = joy.PS2.analog.LX*3;
+                        else
+                            pwm_offset = joy.PS2.analog.LX*5;
+                        if ( joy.PS2.buttons.L1 ) // boton no presionado
+                            sp_tilt = joy.PS2.analog.LY*0.013;
+                        else
+                            sp_tilt = joy.PS2.analog.LY*0.018;
+                    }else if( modo_joy == 1){ // solo joystick derecho
+                        if ( joy.PS2.buttons.R1 ) // boton no presionado
+                            pwm_offset = joy.PS2.analog.RX*3;
+                        else
+                            pwm_offset = joy.PS2.analog.RX*5;
+                        if ( joy.PS2.buttons.L1 ) // boton no presionado
+                            sp_tilt = joy.PS2.analog.RY*0.013;
+                        else
+                            sp_tilt = joy.PS2.analog.RY*0.018;
+                    }else{ // izq adelante/atras, derecho izq/derecha
+                        if ( joy.PS2.buttons.R1 ) // boton no presionado
+                            pwm_offset = joy.PS2.analog.RX*3;
+                        else
+                            pwm_offset = joy.PS2.analog.RX*5;
+                        if ( joy.PS2.buttons.L1 ) // boton no presionado
+                            sp_tilt = joy.PS2.analog.LY*0.013;
+                        else
+                            sp_tilt = joy.PS2.analog.LY*0.018;
+                    }
+
+                    if ( joy.PS2.buttons.X == 0 ){
+                        if ( joy.PS2.buttons.L2 == 0 && joy.PS2.buttons.R2){
+                            modo_joy = 0;
+                        }
+                        if ( joy.PS2.buttons.L2 && joy.PS2.buttons.R2 == 0){
+                            modo_joy = 1;
+                        }
+                        if ( joy.PS2.buttons.L2 == 0 && joy.PS2.buttons.R2 == 0){
+                            modo_joy = 2;
+                        }
+                    }
 
                     reset_sps = 1;
                     xl7105_cnt = 0;
