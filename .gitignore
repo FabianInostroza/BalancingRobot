@@ -82,3 +82,8 @@ Robot-AVR/ISIS.dmp
 Robot-AVR/Last Loaded sim.DBK
 Robot-AVR/sim.PWI
 InterfazRobot/Makefile
+
+# Proteus
+*.DBK
+*.dmp
+*.PWI
