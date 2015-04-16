@@ -77,6 +77,7 @@
 %\usepackage{fourier} % Problemas con wrapfig
 %% Fuente palatino
 \usepackage[T1]{fontenc}
+%\usepackage{lmodern}
 \usepackage[sc]{mathpazo}
 \linespread{1.05}
 %% Similar a palatino pero extendida
@@ -129,7 +130,7 @@
 
 %%% The "real" document content comes below...
 
-\title{Filtros}
+\title{Filtro complementario}
 \author{Fabián Inostroza}
 %\date{} % Activate to display a given date or no date (if empty),
          % otherwise the current date is printed 
@@ -143,12 +144,12 @@
 %    pdfmenubar=true,        % show Acrobat’s menu?
     pdffitwindow=false,     % window fit to page when opened
     pdfstartview={FitH},    % fits the width of the page to the window
-    pdftitle={Filtros, filtro, complementario, complementary, filter, mpu6050, tilt, angle, ángulo, inclinación},    % title
+    pdftitle={Filtro complementario},    % title
     pdfauthor={Fabián Inostroza},     % author
 %    pdfsubject={Subject},   % subject of the document
 %    pdfcreator={Creator},   % creator of the document
 %    pdfproducer={Producer}, % producer of the document
-%    pdfkeywords={keyword1} {key2} {key3}, % list of keywords
+    pdfkeywords={Filtros, filtro, complementario, complementary, filter, mpu6050, tilt, angle, ángulo, inclinación}, % list of keywords
     pdfnewwindow=true,      % links in new window
     colorlinks=true,       % false: boxed links; true: colored links
     linkcolor=blue,          % color of internal links (change box color with linkbordercolor)
@@ -161,7 +162,7 @@
 \maketitle
 
 \section{Aproximación discreta de función de transferencia continua}
-Se usará integración numérica, el método de Euler.
+Se usará integración numérica, específicamente el método de Euler.
 La función de transferencia continua de un integrador es
 \[ H(s) = \frac{1}{s}. \]
 En el método de Euler se aproxima la integral con la siguiente 
@@ -169,16 +170,18 @@ ecuación
 \[ y(k) = y(k-1)+ u(k)\cdot T_0 \]
 donde \( y(k) \) es el valor de integral al paso \( k \),
 \( u_k \) es la variable a integrar y \( T_0 \) es el 
-tiempo de muestreo. Aplicando la transformada Z a la ecuación 
+ paso de integración (tiempo de muestreo). 
+ Aplicando la transformada Z a la ecuación 
 anterior se obtiene la siguiente función de transferencia
 \[ H(z) = \frac{T_0}{1-z^{-1}} = \frac{1}{ \frac{1-z^{-1}}{T_0} } \]
 
 Comparando la función de transferencia continua con la 
 discreta se ve que se puede aproximar la función de 
- transferencia continua haciendo el reemplazo 
+ transferencia continua haciendo el siguiente reemplazo 
 \begin{equation}
 s = \frac{1-z^{-1}}{T_0} \label{eq:s2z}
-\end{equation}.
+\end{equation}
+(no muy formal que digamos).
  
 \section{Filtro pasa bajos}
 La versión circuital de un filtro pasa bajos se muestra en la Figura~\ref{fig:LPF}.
