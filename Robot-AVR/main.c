@@ -125,7 +125,7 @@ ISR(USART0_RX_vect)
     }
 }
 
-ISR(INT2_vect)
+ISR(INT0_vect)
 {
     data_ready = 1;
 }
@@ -203,8 +203,10 @@ int main(void)
         }
     }
 
-    EICRA = (1 << ISC21); // interrupcion INT2 falling edge
-    EIMSK = (1 << INT2); // activar interrupcion INT2
+    DDRD &= ~(1 << PIN2);
+
+    EICRA = (1 << ISC01); // interrupcion INT0 falling edge
+    EIMSK = (1 << INT0); // activar interrupcion INT0
 
     setup_pwm();
 
