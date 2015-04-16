@@ -87,3 +87,6 @@ InterfazRobot/Makefile
 *.DBK
 *.dmp
 *.PWI
+
+# Matlab
+*.m~
