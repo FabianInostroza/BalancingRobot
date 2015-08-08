@@ -236,7 +236,7 @@ int main(void)
 
             err = mpu6050_burstReadWord(0x68, MPU6050_RA_FIFO_R_W, mpu_buf, 4);
 
-            tilt_r = atan2(mpu_buf[1], mpu_buf[2])*180/M_PI;
+            tilt_r = atan2f(mpu_buf[1], mpu_buf[2])*180/M_PI;
 
             if( init ){
                 if( err == 0 )
