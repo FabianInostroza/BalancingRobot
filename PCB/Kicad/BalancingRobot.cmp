@@ -1,0 +1,73 @@
+Cmp-Mod V01 Created by CvPcb (22-Jun-2014 BZR 4027)-stable date = sáb 08 ago 2015 17:04:16 CLT
+
+BeginCmp
+TimeStamp = /555C215E;
+Reference = APM1;
+ValeurCmp = ARDUINO_PRO_MINI;
+IdModule  = ArduinoProMini;
+EndCmp
+
+BeginCmp
+TimeStamp = /555D2538;
+Reference = P1;
+ValeurCmp = PWM;
+IdModule  = PIN_ARRAY_5x1;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C646AB;
+Reference = P2;
+ValeurCmp = BT_USB;
+IdModule  = PIN_ARRAY_5x1;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C66296;
+Reference = P3;
+ValeurCmp = CONN_1;
+IdModule  = 1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C662A3;
+Reference = P4;
+ValeurCmp = CONN_1;
+IdModule  = 1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C662A9;
+Reference = P5;
+ValeurCmp = CONN_1;
+IdModule  = 1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C662AF;
+Reference = P6;
+ValeurCmp = CONN_1;
+IdModule  = 1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = /555C25E6;
+Reference = U1;
+ValeurCmp = 74HC00;
+IdModule  = SOP14N;
+EndCmp
+
+BeginCmp
+TimeStamp = /555D180F;
+Reference = U2;
+ValeurCmp = GY-521;
+IdModule  = GY-521;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C65FCA;
+Reference = U3;
+ValeurCmp = XL7105-SY;
+IdModule  = XL7105-SY;
+EndCmp
+
+EndListe
