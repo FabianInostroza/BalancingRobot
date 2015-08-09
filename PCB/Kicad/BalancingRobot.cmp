@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (22-Jun-2014 BZR 4027)-stable date = sáb 08 ago 2015 17:04:16 CLT
+Cmp-Mod V01 Created by CvPcb (22-Jun-2014 BZR 4027)-stable date = sáb 08 ago 2015 21:14:40 CLT
 
 BeginCmp
 TimeStamp = /555C215E;
@@ -8,10 +8,52 @@ IdModule  = ArduinoProMini;
 EndCmp
 
 BeginCmp
-TimeStamp = /555D2538;
+TimeStamp = /55C67721;
+Reference = C1;
+ValeurCmp = 0.1u;
+IdModule  = c_1206;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C67FCB;
+Reference = C2;
+ValeurCmp = 10u;
+IdModule  = C1V5;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C68DC7;
+Reference = C3;
+ValeurCmp = 0.1u;
+IdModule  = c_tant_B;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C699A9;
+Reference = C4;
+ValeurCmp = 10u;
+IdModule  = c_tant_B;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C68A62;
+Reference = D1;
+ValeurCmp = DIODE;
+IdModule  = D3;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C6A002;
+Reference = JP1;
+ValeurCmp = JUMPER;
+IdModule  = SM0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C6864F;
 Reference = P1;
 ValeurCmp = PWM;
-IdModule  = PIN_ARRAY_5x1;
+IdModule  = PIN_ARRAY-6X1;
 EndCmp
 
 BeginCmp
@@ -50,6 +92,41 @@ IdModule  = 1pin;
 EndCmp
 
 BeginCmp
+TimeStamp = /55C67D74;
+Reference = P7;
+ValeurCmp = CONN_2;
+IdModule  = PIN_ARRAY_2X1;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C693DD;
+Reference = P8;
+ValeurCmp = PWR;
+IdModule  = PIN_ARRAY_2X1;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C6824C;
+Reference = R1;
+ValeurCmp = R;
+IdModule  = R2;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C67EAE;
+Reference = R2;
+ValeurCmp = R;
+IdModule  = R2;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C67EA1;
+Reference = R3;
+ValeurCmp = R;
+IdModule  = R2;
+EndCmp
+
+BeginCmp
 TimeStamp = /555C25E6;
 Reference = U1;
 ValeurCmp = 74HC00;
@@ -68,6 +145,13 @@ TimeStamp = /55C65FCA;
 Reference = U3;
 ValeurCmp = XL7105-SY;
 IdModule  = XL7105-SY;
+EndCmp
+
+BeginCmp
+TimeStamp = /55C6984E;
+Reference = U?1;
+ValeurCmp = MCP1700T-33;
+IdModule  = sot89;
 EndCmp
 
 EndListe
