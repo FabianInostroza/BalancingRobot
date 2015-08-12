@@ -13,6 +13,12 @@
   )
 
   (page USLetter)
+  (title_block 
+    (title "Robot Balancista")
+    (rev 1)
+    (company "Fabián Inostroza")
+  )
+
   (layers
     (15 F.Cu signal)
     (0 B.Cu signal)
@@ -32,7 +38,7 @@
   )
 
   (setup
-    (last_trace_width 0.508)
+    (last_trace_width 0.254)
     (user_trace_width 0.381)
     (user_trace_width 0.508)
     (user_trace_width 0.635)
@@ -1125,8 +1131,8 @@
   (segment (start 131.953 113.03) (end 133.223 114.3) (width 0.762) (layer B.Cu) (net 9) (tstamp 55C57621))
   (segment (start 133.223 114.3) (end 136.144 114.3) (width 0.762) (layer B.Cu) (net 9) (tstamp 55C57624))
   (segment (start 132.08 110.49) (end 136.144 110.49) (width 0.762) (layer B.Cu) (net 10))
-  (segment (start 143.51 109.22) (end 145.923 109.22) (width 0.762) (layer B.Cu) (net 11) (status 400000))
-  (segment (start 147.193 110.49) (end 147.32 110.49) (width 0.762) (layer B.Cu) (net 11) (tstamp 55C57B42) (status 800000))
+  (segment (start 143.51 109.22) (end 145.923 109.22) (width 0.762) (layer B.Cu) (net 11))
+  (segment (start 147.193 110.49) (end 147.32 110.49) (width 0.762) (layer B.Cu) (net 11) (tstamp 55C57B42))
   (segment (start 145.923 109.22) (end 147.193 110.49) (width 0.762) (layer B.Cu) (net 11) (tstamp 55C57B41))
   (segment (start 143.51 113.03) (end 147.32 113.03) (width 0.508) (layer B.Cu) (net 12))
   (segment (start 132.08 107.95) (end 131.191 107.95) (width 0.762) (layer B.Cu) (net 13))
@@ -1167,7 +1173,7 @@
   (segment (start 134.239 112.776) (end 134.239 115.951) (width 0.508) (layer F.Cu) (net 20) (tstamp 55C57B03))
   (via (at 134.239 115.951) (size 1.778) (drill 0.8128) (layers F.Cu B.Cu) (net 20))
   (segment (start 136.144 111.76) (end 135.509 111.76) (width 0.762) (layer B.Cu) (net 20))
-  (segment (start 143.51 114.3) (end 145.161 114.3) (width 0.762) (layer B.Cu) (net 21) (status 400000))
+  (segment (start 143.51 114.3) (end 145.161 114.3) (width 0.762) (layer B.Cu) (net 21))
   (segment (start 145.161 114.3) (end 145.415 114.554) (width 0.635) (layer B.Cu) (net 21) (tstamp 55C57B7E))
   (segment (start 147.32 115.57) (end 146.431 115.57) (width 0.635) (layer B.Cu) (net 21))
   (segment (start 146.431 115.57) (end 145.415 114.554) (width 0.762) (layer B.Cu) (net 21) (tstamp 55C57B7A))
@@ -1546,7 +1552,7 @@
       )
     )
   )
-  (zone (net 0) (net_name "") (layer B.Cu) (tstamp 55C6799B) (hatch edge 0.508)
+  (zone (net 0) (net_name "") (layer B.Cu) (tstamp 55C6799B) (hatch full 0.508)
     (connect_pads (clearance 0.508))
     (min_thickness 0.254)
     (keepout (tracks not_allowed) (vias not_allowed) (copperpour not_allowed))
