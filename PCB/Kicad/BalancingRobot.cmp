@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (22-Jun-2014 BZR 4027)-stable date = sáb 08 ago 2015 21:14:40 CLT
+Cmp-Mod V01 Created by CvPcb (22-Jun-2014 BZR 4027)-stable date = mié 12 ago 2015 19:12:38 CLT
 
 BeginCmp
 TimeStamp = /555C215E;
@@ -50,10 +50,10 @@ IdModule  = SM0603;
 EndCmp
 
 BeginCmp
-TimeStamp = /55C6864F;
+TimeStamp = /55CBC4C5;
 Reference = P1;
 ValeurCmp = PWM;
-IdModule  = PIN_ARRAY-6X1;
+IdModule  = PINHEAD1-8;
 EndCmp
 
 BeginCmp

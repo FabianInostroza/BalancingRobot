@@ -40,7 +40,7 @@ $Descr USLetter 11000 8500
 encoding utf-8
 Sheet 1 1
 Title "Robot Balancista"
-Date "9 aug 2015"
+Date "12 aug 2015"
 Rev "1"
 Comp "Fabián Inostroza"
 Comment1 ""
@@ -873,4 +873,40 @@ F 3 "~" H 2250 1350 60  0000 C CNN
 $EndComp
 Wire Wire Line
 	2550 1350 2700 1350
+Text Notes 4400 3550 0    40   ~ 0
+PD2
+Text Notes 4400 3650 0    40   ~ 0
+PD3
+Text Notes 4400 3750 0    40   ~ 0
+PD4
+Text Notes 4400 3850 0    40   ~ 0
+PD5
+Text Notes 4400 3950 0    40   ~ 0
+PD6
+Text Notes 4400 4050 0    40   ~ 0
+PD7
+Text Notes 4400 4150 0    40   ~ 0
+PB0
+Text Notes 4400 4250 0    40   ~ 0
+PB1
+Text Notes 4800 3550 2    40   ~ 0
+PC3
+Text Notes 4800 3650 2    40   ~ 0
+PC2
+Text Notes 4800 3750 2    40   ~ 0
+PC1
+Text Notes 4800 3850 2    40   ~ 0
+PC0
+Text Notes 4800 3950 2    40   ~ 0
+PB5
+Text Notes 4800 4050 2    40   ~ 0
+PB4
+Text Notes 4800 4150 2    40   ~ 0
+PB3
+Text Notes 4800 4250 2    40   ~ 0
+PB2
+Text Notes 4400 4350 2    40   ~ 0
+PC4
+Text Notes 4800 4350 0    40   ~ 0
+PC5
 $EndSCHEMATC

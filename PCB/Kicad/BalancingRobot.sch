@@ -40,7 +40,7 @@ $Descr USLetter 11000 8500
 encoding utf-8
 Sheet 1 1
 Title "Robot Balancista"
-Date "9 aug 2015"
+Date "12 aug 2015"
 Rev "1"
 Comp "Fabián Inostroza"
 Comment1 ""
@@ -208,7 +208,7 @@ F 3 "" H 5650 3450 60  0000 C CNN
 $EndComp
 Text Label 9100 2650 0    60   ~ 0
 PWM2A
-Text Label 8900 3100 0    60   ~ 0
+Text Label 8850 3100 0    60   ~ 0
 PWM2B
 Text Label 8900 4000 0    60   ~ 0
 PWM1A
@@ -358,11 +358,11 @@ Wire Wire Line
 Wire Wire Line
 	7350 4100 7600 4100
 Wire Wire Line
-	8800 2650 9250 2650
+	8800 2650 9200 2650
 Wire Wire Line
-	9250 2650 9250 3350
+	9200 2650 9200 3350
 Wire Wire Line
-	9250 3350 9450 3350
+	9200 3350 9450 3350
 Wire Wire Line
 	9450 3450 9050 3450
 Wire Wire Line
@@ -382,9 +382,7 @@ Wire Wire Line
 Wire Wire Line
 	9250 4450 8800 4450
 Wire Wire Line
-	9450 3750 9400 3750
-Wire Wire Line
-	9400 3750 9400 4150
+	8850 3750 9450 3750
 Wire Wire Line
 	5300 3250 5850 3250
 Wire Wire Line
@@ -675,22 +673,11 @@ Text GLabel 5500 3650 2    40   Input ~ 0
 BAT
 Wire Wire Line
 	5500 3650 5300 3650
-$Comp
-L CONN_6 P1
-U 1 1 55C6864F
-P 9800 3500
-F 0 "P1" V 9750 3500 60  0000 C CNN
-F 1 "PWM" V 9850 3500 60  0000 C CNN
-F 2 "" H 9800 3500 60  0000 C CNN
-F 3 "" H 9800 3500 60  0000 C CNN
-	1    9800 3500
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
-	9450 3250 9350 3250
+	9450 3250 9300 3250
 Wire Wire Line
-	9350 3250 9350 3100
-Text Label 9350 3100 0    60   ~ 0
+	9300 3250 9300 3100
+Text Label 9300 3100 0    60   ~ 0
 EN_HB
 Wire Wire Line
 	3900 3550 3750 3550
@@ -873,4 +860,71 @@ F 3 "~" H 2250 1350 60  0000 C CNN
 $EndComp
 Wire Wire Line
 	2550 1350 2700 1350
+Text Notes 4400 3550 0    40   ~ 0
+PD2
+Text Notes 4400 3650 0    40   ~ 0
+PD3
+Text Notes 4400 3750 0    40   ~ 0
+PD4
+Text Notes 4400 3850 0    40   ~ 0
+PD5
+Text Notes 4400 3950 0    40   ~ 0
+PD6
+Text Notes 4400 4050 0    40   ~ 0
+PD7
+Text Notes 4400 4150 0    40   ~ 0
+PB0
+Text Notes 4400 4250 0    40   ~ 0
+PB1
+Text Notes 4800 3550 2    40   ~ 0
+PC3
+Text Notes 4800 3650 2    40   ~ 0
+PC2
+Text Notes 4800 3750 2    40   ~ 0
+PC1
+Text Notes 4800 3850 2    40   ~ 0
+PC0
+Text Notes 4800 3950 2    40   ~ 0
+PB5
+Text Notes 4800 4050 2    40   ~ 0
+PB4
+Text Notes 4800 4150 2    40   ~ 0
+PB3
+Text Notes 4800 4250 2    40   ~ 0
+PB2
+Text Notes 4400 4350 2    40   ~ 0
+PC4
+Text Notes 4800 4350 0    40   ~ 0
+PC5
+$Comp
+L CONN_8 P1
+U 1 1 55CBC4C5
+P 9800 3500
+F 0 "P1" V 9750 3500 60  0000 C CNN
+F 1 "PWM" V 9850 3500 60  0000 C CNN
+F 2 "" H 9800 3500 60  0000 C CNN
+F 3 "" H 9800 3500 60  0000 C CNN
+	1    9800 3500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9450 3850 9400 3850
+Wire Wire Line
+	9400 3150 9400 4150
+$Comp
+L VCC #PWR?
+U 1 1 55CBC5E0
+P 8850 3650
+F 0 "#PWR?" H 8850 3750 30  0001 C CNN
+F 1 "VCC" H 8850 3750 30  0000 C CNN
+F 2 "" H 8850 3650 60  0000 C CNN
+F 3 "" H 8850 3650 60  0000 C CNN
+	1    8850 3650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8850 3750 8850 3650
+Wire Wire Line
+	9450 3150 9400 3150
+Connection ~ 9400 3850
 $EndSCHEMATC
