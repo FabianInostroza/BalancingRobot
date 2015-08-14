@@ -1,6 +1,9 @@
 #ifndef A7105_CONFIG_H_INCLUDED
 #define A7105_CONFIG_H_INCLUDED
 
+#include <avr/pgmspace.h>
+
+#ifdef __AVR_ATmega1284P__
 #define WTR_DDR DDRA
 #define WTR_PIN PIN7
 #define WTR_PORT PINA
@@ -8,6 +11,16 @@
 #define CS_DDR DDRA
 #define CS_PIN PIN4
 #define CS_PORT PORTA
+#elif defined(__AVR_ATmega328P__)
+#define WTR_DDR DDRD
+#define WTR_PIN PIN5
+#define WTR_PORT PIND
+
+#define CS_DDR DDRD
+#define CS_PIN PIN2
+#define CS_PORT PORTD
+
+#endif // __AVR_ATmega1284P__
 
 // GIO1 como pin WTR
 #define GIO1 0x01
@@ -111,7 +124,7 @@
 #define CD3R 0xAA
 #endif
 
-const uint8_t A7105_config[] = {
+const uint8_t A7105_config[] PROGMEM = {
     0x00, // (0x00) RESET register
     //0x42, // (0x01) MODE register
     0x62, // (0x01) MODE register

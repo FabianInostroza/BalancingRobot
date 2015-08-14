@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#ifdef __AVR_ATmega1284P__
 #define CLK_PIN PIN6
 #define SDIO_PIN PIN5
 #define CLK_PORT PORTA
@@ -8,6 +9,15 @@
 #define SDIO_PIN_PORT PINA
 #define SDIO_DDR DDRA
 #define CLK_DDR DDRA
+#elif defined(__AVR_ATmega328P__)
+#define CLK_PIN PIN3
+#define SDIO_PIN PIN4
+#define CLK_PORT PORTD
+#define SDIO_PORT PORTD
+#define SDIO_PIN_PORT PIND
+#define SDIO_DDR DDRD
+#define CLK_DDR DDRD
+#endif
 
 void setup_spi(void)
 {
