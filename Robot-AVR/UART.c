@@ -19,7 +19,11 @@ static volatile uint8_t tx0_tail_pointer = 0;
 static volatile uint8_t tx0_head_pointer = 0;
 static volatile uint8_t tx0_buffer_full = 0;
 
+#ifndef __AVR_ATmega328P__
 ISR(USART0_UDRE_vect)
+#else
+ISR(USART_UDRE_vect)
+#endif // __AVR_ATmega328P__
 {
     UDR0 = buf0[tx0_head_pointer];
     tx0_head_pointer = (tx0_head_pointer+1)%TX0_BUFFER_SIZE;
@@ -34,7 +38,9 @@ ISR(USART0_UDRE_vect)
 
 void setupUART0(uint8_t enTX, uint8_t enRX)
 {
+    #ifndef __AVR_ATmega328P__
     PRR0 &= ~(1 << PRUSART0);
+    #endif
     UBRR0H = UBRRH_VALUE;
     UBRR0L = UBRRL_VALUE;
     #if USE_2X
@@ -161,6 +167,9 @@ inline void UART0_send_hex(uint8_t h)
 }
 
 /*******************************************************/
+// 328P no tiene uart1
+#ifndef __AVR_ATmega328P__
+
 #ifdef USE_UART1_TX_INTERRUPT
 
 // USART1_RX_vect
@@ -311,3 +320,4 @@ inline void UART1_send_hex(uint8_t h)
     }
 }
 
+#endif

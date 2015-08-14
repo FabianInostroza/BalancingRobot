@@ -3,7 +3,9 @@
 
 void setupTWI(void)
 {
+    #ifndef __AVR_ATmega328P__
     PRR0 &= ~(1 << PRTWI);
+    #endif
     //TWSR |= (1 << TWPS1) | (1 << TWPS0); // preescaler=64
     //TWSR |= (1 << TWPS1); // preescaler=16
     //TWSR |= (1 << TWPS0); // preescaler=4

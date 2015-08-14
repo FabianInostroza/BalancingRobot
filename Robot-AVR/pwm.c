@@ -2,6 +2,8 @@
 
 void setup_pwm(void)
 {
+
+    #ifndef __AVR_ATmega328P__
     DDRD |= (1 << PIN4) | (1 << PIN5);
     DDRB |= (1 << PIN6) | (1 << PIN7);
     // phase and frequency correct pwm, ~7.5kHz
@@ -26,4 +28,36 @@ void setup_pwm(void)
 
     OCR3A = 0;
     OCR3B = 0;
+
+    #else
+
+    #endif // __AVR_ATmega328P__
+}
+
+inline void pwmL_duty(int16_t d)
+{
+    #ifndef __AVR_ATmega328P__
+    if ( d < 0 ){
+        OCR3A = -d; // B-IA
+        OCR3B = 0; // B-IB
+    }else{
+        OCR3A = 0; // B-IA
+        OCR3B = d; // B-IB
+    }
+    #else
+    #endif // __AVR_ATmega328P__
+}
+
+inline void pwmR_duty(int16_t d)
+{
+    #ifndef __AVR_ATmega328P__
+    if ( d < 0){
+        OCR1A = -d; // A-IA
+        OCR1B = 0; // A-IB
+    }else{
+        OCR1A = 0; // A-IA
+        OCR1B = d; // A-IB
+    }
+    #else
+    #endif // __AVR_ATmega328P__
 }

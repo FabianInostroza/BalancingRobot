@@ -13,8 +13,14 @@
 #include "spi.h"
 #include "XL7105.h"
 
-#define ENVIAR_DATOS
-#define USAR_XL7105
+//#define ENVIAR_DATOS
+//#define USAR_XL7105
+
+#ifndef __AVR_ATmega328P__
+#define PIN_LED PIN0
+#else
+#define PIN_LED PIN5
+#endif // __AVR_ATmega328P__
 
 static volatile uint8_t data_ready = 0;
 static volatile uint8_t update_ks = 0;
@@ -54,7 +60,11 @@ typedef union{
     int8_t sbytes[7];
 }PS2_joy;
 
+#ifndef __AVR_ATmega328P__
 ISR(USART0_RX_vect)
+#else
+ISR(USART_RX_vect)
+#endif
 {
     char c = 0;
     static uint16_t tmp = 0;
@@ -183,7 +193,7 @@ int main(void)
     uint8_t xl7105_ok = 0;
     #endif // USAR_XL7105
 
-    DDRB = (1 << PIN0);
+    DDRB = (1 << PIN_LED);
 
     // activar el watchdog
     // despues se reconfigura para
@@ -197,16 +207,25 @@ int main(void)
     // si falla la inicializacion no continuar
     // y parpadear el led
     if( err ){
+        setupUART0(1,0);
+        sei();
+        UART0_sends("Error: ");
+        UART0_send_hex8(err);
+        UART0_Tx('\n');
         while(1){
-            PINB = 0x01;
+            PINB = (1 << PIN_LED);
             _delay_ms(200);
         }
     }
 
+    #ifndef __AVR_ATmega328P__
     DDRD &= ~(1 << PIN2);
 
     EICRA = (1 << ISC01); // interrupcion INT0 falling edge
     EIMSK = (1 << INT0); // activar interrupcion INT0
+    #else
+    #warning "configurar interrupcion de IMU"
+    #endif // __AVR_ATmega328P__
 
     setup_pwm();
 
@@ -220,7 +239,7 @@ int main(void)
 
     //PINC |= (1 << PIN0) | (1 << PIN1);
     if ( err == 0 && xl7105_ok == 0)
-        PORTB |= (1 << PIN0);
+        PORTB |= (1 << PIN_LED);
 
     UART0_sends("Holaa\n");
     initPIDParams_f(&pid, kc, ti, td, 0, 0, 0x3ff, 0x3ff, t0);
@@ -237,6 +256,7 @@ int main(void)
             err = mpu6050_burstReadWord(0x68, MPU6050_RA_FIFO_R_W, mpu_buf, 4);
 
             tilt_r = atan2f(mpu_buf[1], mpu_buf[2])*180/M_PI;
+            //tilt_r = mpu_buf[1]*180/M_PI;
 
             if( init ){
                 if( err == 0 )
@@ -269,33 +289,20 @@ int main(void)
                 pwma = 0.92*(pwm_cmp + pwm_offset);
                 pwmb = pwm_cmp - pwm_offset;
 
-                if (pwma > 0x3ff)
-                    pwma = 0x3ff;
+//                if (pwma > 0x3ff)
+//                    pwma = 0x3ff;
+//
+//                if (pwma < -0x3ff)
+//                    pwma = -0x3ff;
+//
+//                if (pwmb > 0x3ff)
+//                    pwmb = 0x3ff;
+//
+//                if (pwmb < -0x3ff)
+//                    pwmb = -0x3ff;
 
-                if (pwma < -0x3ff)
-                    pwma = -0x3ff;
-
-                if (pwmb > 0x3ff)
-                    pwmb = 0x3ff;
-
-                if (pwmb < -0x3ff)
-                    pwmb = -0x3ff;
-
-                if ( pwma < 0 ){
-                    OCR3A = -pwma; // B-IA
-                    OCR3B = 0; // B-IB
-                }else{
-                    OCR3A = 0; // B-IA
-                    OCR3B = pwma; // B-IB
-                }
-
-                if ( pwmb < 0){
-                    OCR1A = -pwmb; // A-IA
-                    OCR1B = 0; // A-IB
-                }else{
-                    OCR1A = 0; // A-IA
-                    OCR1B = pwmb; // A-IB
-                }
+                pwmL_duty(pwma);
+                pwmR_duty(pwmb);
 
             }
 
