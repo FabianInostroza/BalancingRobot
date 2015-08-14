@@ -82,6 +82,12 @@ Robot-AVR/ISIS.dmp
 Robot-AVR/Last Loaded sim.DBK
 Robot-AVR/sim.PWI
 InterfazRobot/Makefile
+Robot-AVR/bin/Debug/
+Robot-AVR/bin/Debug328P/
+Robot-AVR/bin/Release328P/
+Robot-AVR88/bin/Debug/
+Robot-AVR_test/
+Robot/
 
 # Proteus
 *.DBK
