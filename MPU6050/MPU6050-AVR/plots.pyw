@@ -9,6 +9,7 @@ import numpy as np
 
 com_port = "COM3" #"/dev/ttyUSB0"
 com_port = "/dev/ttyUSB0"
+#com_port = "/dev/rfcomm0"
 
 class TimeAxisItem(pg.AxisItem):
     def __init__(self, *args, **kwargs):
@@ -19,7 +20,7 @@ class TimeAxisItem(pg.AxisItem):
         labels = [self._time.addMSecs(value).toString('mm:ss') for value in values]
         return labels
 
-    def tickSpacinggh(self, minVal, maxVal, size):
+    def tickSpacing(self, minVal, maxVal, size):
         return [(size/2.0, 0),
                 (size/5.0, 0),
                ]
@@ -141,6 +142,7 @@ class COMM(QtCore.QThread):
                 msg = msg.strip('\r')
                 d = msg.split(';')
                 if len(d) >= 6:
+                    #print d
                     self.updateData.emit(d)
 
             if self._stop:
@@ -214,9 +216,9 @@ class MainWindow(QtGui.QWidget):
             gy = int(d[4],16)
             gz = int(d[5],16)
 
-            ax = (ax-(ax&0x8000)*2)/16384.0
-            ay = (ay-(ay&0x8000)*2)/16384.0
-            az = (az-(az&0x8000)*2)/16384.0
+            ax = (ax-(ax&0x8000)*2)*8/16384.0
+            ay = (ay-(ay&0x8000)*2)*8/16384.0
+            az = (az-(az&0x8000)*2)*8/16384.0
 
             gx = (gx-(gx&0x8000)*2)/65.5
             gy = (gy-(gy&0x8000)*2)/65.5

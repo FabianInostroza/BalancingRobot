@@ -5,7 +5,9 @@
 
 void setupUART0(uint8_t enTX, uint8_t enRX)
 {
+    #ifndef __AVR_ATmega328P__
     PRR0 &= ~(1 << PRUSART0);
+    #endif // __AVR_ATmega328P__
     UBRR0H = UBRRH_VALUE;
     UBRR0L = UBRRL_VALUE;
     #if USE_2X

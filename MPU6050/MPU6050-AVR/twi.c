@@ -3,10 +3,14 @@
 
 void setupTWI(void)
 {
+    #ifndef __AVR_ATmega328P__
     PRR0 &= ~(1 << PRTWI);
+    #endif // __AVR_ATmega328P__
     //TWSR |= (1 << TWPS1); // preescaler=16
     //TWSR |= (1 << TWPS0); // preescaler=4
-    TWSR &= 0x3; // preescaler=1
+
+    //TWSR &= 0x3; // preescaler=1
+    TWSR = 0; // preescaler=1
     // preescaler = 16
     //TWBR = 1; // Freq(SCL) = 16e6/(16+2*1*16)=333kHz
     //TWBR = 2; // Freq(SCL) = 16e6/(16+2*2*16)=200kHz

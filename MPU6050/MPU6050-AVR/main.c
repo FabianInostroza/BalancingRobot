@@ -1,12 +1,19 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <avr/wdt.h>
 #include <stdio.h>
 #include <math.h>
 
 #include "twi.h"
 #include "UART.h"
 #include "MPU6050.h"
+
+#ifndef __AVR_ATmega328P__
+#define PIN_LED PIN0
+#else
+#define PIN_LED PIN5
+#endif // __AVR_ATmega328P__
 
 _Accum short test_asd;
 
@@ -18,12 +25,25 @@ static volatile uint8_t reg_w_val;
 static volatile uint8_t addr;
 static volatile uint8_t data_ready;
 
-ISR(INT2_vect)
+#ifndef __AVR_ATmega328P__
+ISR(INT0_vect)
 {
     data_ready = 1;
 }
+#else
+ISR(PCINT1_vect)
+{
+    if (PINC & (1 << PINC3))
+        data_ready = 1;
+}
+#endif // __AVR_ATmega328P__
 
+
+#ifndef __AVR_ATmega328P__
 ISR(USART0_RX_vect)
+#else
+ISR(USART_RX_vect)
+#endif // __AVR_ATmega328P__
 {
     static uint8_t st, action;
     static uint8_t reg_tmp, st2;
@@ -109,24 +129,45 @@ int main(void)
     int16_t mpu_buf[6];
     uint8_t err;
     uint8_t reg_val;
-    DDRB = (1 << PIN0);
+    DDRB = (1 << PIN_LED);
     uint8_t i;
 
     setupUART0(1, 1);
     UART0_enRxInt(1);
 
+    wdt_enable(WDTO_2S);
+
     err = setupMPU6050(0x68);
 
-    EICRA = (1 << ISC21); // interrupcion INT2 falling edge
-    EIMSK = (1 << INT2); // activar interrupcion INT2
+    wdt_disable();
+
+    if( err ){
+        while(1){
+            PINB |= (1 << PIN_LED);
+            _delay_ms(200);
+        }
+    }
+
+    #ifndef __AVR_ATmega328P__
+    DDRD &= ~(1 << PIN2);
+
+    EICRA = (1 << ISC01); // interrupcion INT0 falling edge
+    EIMSK = (1 << INT0); // activar interrupcion INT0
+    #else
+    PCMSK1 = (1 << PCINT11);
+    PCICR =  (1 << PCIE1);
+    PCIFR = 0;
+    #endif // __AVR_ATmega328P__
 
     sei();
 
     //PINC |= (1 << PIN0) | (1 << PIN1);
-    PORTB |= (1 << PIN0);
+    PORTB |= (1 << PIN_LED);
     sprintf(buf, "E: %i\n", err);
     UART0_sends(buf);
     // Insert code
+
+    wdt_enable(WDTO_250MS);
 
     while(1){
         if (write_reg){
@@ -182,6 +223,7 @@ int main(void)
             UART0_Tx('\n');
 
         }
+        wdt_reset();
     }
 
     return 0;

@@ -19,7 +19,7 @@ class TimeAxisItem(pg.AxisItem):
         labels = [self._time.addMSecs(value).toString('mm:ss') for value in values]
         return labels
 
-    def tickSpacinggh(self, minVal, maxVal, size):
+    def tickSpacing(self, minVal, maxVal, size):
         return [(size/2.0, 0),
                 (size/5.0, 0),
                ]
