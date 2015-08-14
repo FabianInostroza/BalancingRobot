@@ -1,6 +1,8 @@
 #include <avr/io.h>
 #include <util/twi.h>
 
+#define _TIMEOUT 1024
+
 void setupTWI(void)
 {
     #ifndef __AVR_ATmega328P__
@@ -9,25 +11,25 @@ void setupTWI(void)
     //TWSR |= (1 << TWPS1) | (1 << TWPS0); // preescaler=64
     //TWSR |= (1 << TWPS1); // preescaler=16
     //TWSR |= (1 << TWPS0); // preescaler=4
-    TWSR &= 0x3; // preescaler=1
+    TWSR = 0; // preescaler=1
     // preescaler = 16
     //TWBR = 1; // Freq(SCL) = 16e6/(16+2*1*16)=333kHz
     TWBR = 2; // Freq(SCL) = 16e6/(16+2*2*16)=200kHz
     //TWBR = 8; // Freq(SCL) = 16e6/(16+2*8*16)=58kHz
     //TWBR = 48; // Freq(SCL) = 16e6/(16+2*48*16)=10kHz
     // preescaler = 1
-    //TWBR = 13; // 380952 Hz
+    TWBR = 13; // 380952 Hz
     //TWBR = (F_CPU/100000L-16L)/2;
     //TWBR = (F_CPU/200000L-16L)/2;
-    TWBR = (F_CPU/300000L-16L)/2;
+    //TWBR = (F_CPU/300000L-16L)/2;
 }
 
 uint8_t twi_start(uint8_t addr, uint8_t w)
 {
     uint8_t tw_st;
-    uint8_t timeout = 0;
+    uint16_t timeout = 0;
     TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN); // enviar START
-    while( !(TWCR & (1 << (TWINT) ) ) && timeout++ < 255 ); // esperar a que se envie el START
+    while( !(TWCR & (1 << (TWINT) ) ) && timeout++ < _TIMEOUT ); // esperar a que se envie el START
     // si se envio correctamente el START, continuar
     tw_st = TWSR & 0xF8;
     // verificar si se envio correctamente el start
@@ -43,7 +45,7 @@ uint8_t twi_start(uint8_t addr, uint8_t w)
 
     timeout = 0;
 
-    while( !(TWCR & (1 << (TWINT) ) ) && timeout++ < 255 ); // esperar a que se envie la direccion
+    while( !(TWCR & (1 << (TWINT) ) ) && timeout++ < _TIMEOUT ); // esperar a que se envie la direccion
 
     tw_st = TWSR & 0xF8;
     // verificar si el esclavo responde la solicitud
@@ -64,11 +66,11 @@ void twi_stop(void)
 inline uint8_t twi_write(uint8_t d)
 {
     uint8_t tw_st;
-    uint8_t timeout = 0;
+    uint16_t timeout = 0;
     TWDR = d; // cargar los datos
     TWCR = (1 << TWINT) | (1 << TWEN); // enviar los datos
 
-    while( !(TWCR & (1 << (TWINT) ) ) && timeout++ < 255 ); // esperar a que se envien los datos
+    while( !(TWCR & (1 << (TWINT) ) ) && timeout++ < _TIMEOUT ); // esperar a que se envien los datos
 
     // si se envio correctamente los datos, continuar
     tw_st = TWSR & 0xF8;
@@ -97,11 +99,11 @@ uint8_t twi_send(uint8_t sl_addr, uint8_t * data, uint8_t n)
 
 inline uint8_t twi_read(uint8_t ack)
 {
-    uint8_t timeout = 0;
+    uint16_t timeout = 0;
     if (ack)
         TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
     else
         TWCR = (1 << TWINT) | (1 << TWEN);
-    while( !( TWCR & (1 << TWINT)) && timeout++ < 255 );
+    while( !( TWCR & (1 << TWINT)) && timeout++ < _TIMEOUT );
     return TWDR;
 }

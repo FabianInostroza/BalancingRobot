@@ -3,14 +3,17 @@
 
 #include <util/delay.h>
 
+#define N_AVG_SAMPLES 64
+#define N_IGN_SAMPLES 32
+
 uint8_t setupMPU6050(uint8_t addr)
 {
     uint8_t err = 0;
     uint8_t addr_r;
     setupTWI();
-    err = mpu6050_writeReg(addr, MPU6050_RA_PWR_MGMT_1, 0x80); // reset
+    err = mpu6050_writeReg(addr, MPU6050_RA_PWR_MGMT_1, 0x81); // reset y reloj desde gyro x
     _delay_ms(20);
-    err |= mpu6050_writeReg(addr, MPU6050_RA_PWR_MGMT_1, 0);
+    err |= mpu6050_writeReg(addr, MPU6050_RA_PWR_MGMT_1, 1);
     _delay_ms(1);
     err |= mpu6050_readReg(addr, MPU6050_RA_WHO_AM_I, &addr_r );
     if( err || addr != addr_r )
@@ -68,12 +71,12 @@ uint8_t mpu6050_gyroCal(uint8_t addr)
     uint16_t i;
 
     // descartar las primeras 50 muestras
-    for( i = 0; i < 50; i++){
+    for( i = 0; i < N_IGN_SAMPLES; i++){
         mpu6050_readGyro(addr, &gx, &gy, &gz);
         _delay_ms(5);
     }
 
-    for( i = 0; i < 0x80; i++){
+    for( i = 0; i < N_AVG_SAMPLES; i++){
         if( mpu6050_readGyro(addr, &gx, &gy, &gz) )
             return -1;
         offsets[0] += gx;
@@ -82,9 +85,9 @@ uint8_t mpu6050_gyroCal(uint8_t addr)
         _delay_ms(5);
     }
 
-    offsets[0] /= 0x80;
-    offsets[1] /= 0x80;
-    offsets[2] /= 0x80;
+    offsets[0] /= N_AVG_SAMPLES;
+    offsets[1] /= N_AVG_SAMPLES;
+    offsets[2] /= N_AVG_SAMPLES;
 
     mpu6050_setGyroOffsets(addr, -gx, -gy, -gz);
     return 0;

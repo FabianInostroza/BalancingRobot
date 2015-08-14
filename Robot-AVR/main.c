@@ -13,7 +13,7 @@
 #include "spi.h"
 #include "XL7105.h"
 
-//#define ENVIAR_DATOS
+#define ENVIAR_DATOS
 //#define USAR_XL7105
 
 #ifndef __AVR_ATmega328P__
@@ -135,10 +135,19 @@ ISR(USART_RX_vect)
     }
 }
 
+#ifndef __AVR_ATmega328P__
 ISR(INT0_vect)
 {
     data_ready = 1;
 }
+#else
+ISR(PCINT1_vect)
+{
+    if (PINC & (1 << PINC3))
+        data_ready = 1;
+}
+#endif // __AVR_ATmega328P__
+
 
 inline int16_t deadBand_comp(int16_t x)
 {
@@ -199,7 +208,10 @@ int main(void)
     // despues se reconfigura para
     // un tiempo mas pequeno
     wdt_enable(WDTO_2S);
-
+    // se redujo la cantidad de muestras
+    // usada en la calibracion del giroscopio
+    // ya que tardaba mucho y el microcontrolador
+    // se reseteaba por el watchdog
     err = setupMPU6050(0x68);
 
     wdt_disable();
@@ -225,6 +237,9 @@ int main(void)
     EIMSK = (1 << INT0); // activar interrupcion INT0
     #else
     #warning "configurar interrupcion de IMU"
+    PCMSK1 = (1 << PCINT11);
+    PCICR =  (1 << PCIE1);
+    PCIFR = 0;
     #endif // __AVR_ATmega328P__
 
     setup_pwm();
