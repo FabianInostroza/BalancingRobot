@@ -23,13 +23,13 @@ uint8_t setup_xl7105(void)
     _delay_us(10);
 
     for (i = 1; i<= 0x04; i++)
-        xl7105_write(i, A7105_config[i]);
+        xl7105_write(i, pgm_read_byte(&A7105_config[i]));
 
     for (i = 0x07; i<= 0x22; i++)
-        xl7105_write(i, A7105_config[i]);
+        xl7105_write(i, pgm_read_byte(&A7105_config[i]));
 
     for (i = 0x24; i<= 0x31; i++)
-        xl7105_write(i, A7105_config[i]);
+        xl7105_write(i, pgm_read_byte(&A7105_config[i]));
 
     xl7105_write_id(ID0, ID1, ID2, ID3);
 

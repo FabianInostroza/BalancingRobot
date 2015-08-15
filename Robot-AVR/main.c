@@ -14,7 +14,7 @@
 #include "XL7105.h"
 
 #define ENVIAR_DATOS
-//#define USAR_XL7105
+#define USAR_XL7105
 
 #ifndef __AVR_ATmega328P__
 #define PIN_LED PIN0
@@ -236,7 +236,6 @@ int main(void)
     EICRA = (1 << ISC01); // interrupcion INT0 falling edge
     EIMSK = (1 << INT0); // activar interrupcion INT0
     #else
-    #warning "configurar interrupcion de IMU"
     PCMSK1 = (1 << PCINT11);
     PCICR =  (1 << PCIE1);
     PCIFR = 0;
