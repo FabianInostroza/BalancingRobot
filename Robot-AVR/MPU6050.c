@@ -32,7 +32,10 @@ uint8_t setupMPU6050(uint8_t addr)
     // activar pruebas del acelerometro, rango = +/-8g
     //err = mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x10);
     //err |= mpu6050_setAccelOffsets(0x68, (2), (-40), (1756-2048));
-    err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (-24), (-303));
+    //err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (-24), (-303));
+    // salida = ai - offset
+    err |= mpu6050_setAccelOffsets(0x68, (2082-2048), (10), (70));
+
     err |= mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x0); // +/-2g
     // activar fifo para giroscopios y acelerometro
     //err |= mpu6050_writeReg(addr, MPU6050_RA_FIFO_EN, 0x78);

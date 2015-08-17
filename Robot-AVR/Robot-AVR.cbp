@@ -103,6 +103,9 @@
 				</Compiler>
 				<Linker>
 					<Add option="-mmcu=atmega1284p" />
+					<Add option="-Wl,-u,vfprintf" />
+					<Add option="-lprintf_flt" />
+					<Add option="-lm" />
 				</Linker>
 				<Environment>
 					<Variable name="MCU" value="atmega1284p" />

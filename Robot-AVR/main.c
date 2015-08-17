@@ -1,3 +1,35 @@
+/*
+
+MOTOR   COLOR   Puente H
+------------------------------
+A       VERDE    IN1
+A       GRIS     IN2
+B       AZUL     IN3
+B       AMARILLO IN4
+
+___________________
+|    MOTOR A      |
+-------------------
+| IN1 | IN2 | DIR |
+-------------------
+|  0  |  0  |  -  |
+|  0  |  1  | REV |
+|  1  |  0  | FWD |
+|  1  |  1  |  -  |
+-------------------
+___________________
+|    MOTOR B      |
+-------------------
+| IN3 | IN4 | DIR |
+-------------------
+|  0  |  0  |  -  |
+|  0  |  1  | FWD |
+|  1  |  0  | REV |
+|  1  |  1  |  -  |
+-------------------
+
+*/
+
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -26,6 +58,7 @@ static volatile uint8_t data_ready = 0;
 static volatile uint8_t update_ks = 0;
 static volatile int16_t kpid = 0;
 static volatile uint8_t enviar_datos = 0;
+static uint8_t calibrar = 0, calibrar_1 = 0;
 
 typedef union{
     struct{
@@ -98,6 +131,9 @@ ISR(USART_RX_vect)
                     break;
                 case 't':
                     enviar_datos = 0;
+                    break;
+                case 'c':
+                    calibrar ^= 1;
                     break;
                 case ':':
                 case '\n':
@@ -188,6 +224,17 @@ int main(void)
     char buf[30];
     #endif
 
+    #ifdef __AVR_ATmega328P__
+    // pines pwm
+    DDRB = (1 << PINB0) | (1 << PINB3) | (1 << PINB4);
+    DDRB |= (1 << PINB5);
+    DDRD = (1 << PIND7);
+
+    // desactivar driver
+    PORTB = (1 << PINB0) | (1 << PINB3) | (1 << PINB4);
+    PORTD = (1 << PIND7);
+    #endif // __AVR_ATmega328P__
+
     #ifdef USAR_XL7105
     uint8_t xl7105_ok = 0;
     uint8_t xl7105_cnt = 0;
@@ -202,7 +249,7 @@ int main(void)
     uint8_t xl7105_ok = 0;
     #endif // USAR_XL7105
 
-    DDRB = (1 << PIN_LED);
+    DDRB |= (1 << PIN_LED);
 
     // activar el watchdog
     // despues se reconfigura para
@@ -269,59 +316,68 @@ int main(void)
 
             err = mpu6050_burstReadWord(0x68, MPU6050_RA_FIFO_R_W, mpu_buf, 4);
 
-            tilt_r = atan2f(mpu_buf[1], mpu_buf[2])*180/M_PI;
-            //tilt_r = mpu_buf[1]*180/M_PI;
-
-            if( init ){
-                if( err == 0 )
-                    init = 0;
-                tilt = tilt_r;
-            }else{
-                tilt = (1.0-alpha)*(tilt + mpu_buf[3]*gyro_k) + alpha*tilt_r;
-
-                derror = 0 - mpu_buf[3]*gyro_sens;
-
-                tilt_r = tilt;
-
-                if (tilt_r >= 10) {
-                    tilt_r = 10;
+            if( calibrar == 0 ){
+                if( calibrar_1 == 1){
+                    // rango +/- 2g
+                    mpu6050_writeReg(0x68, MPU6050_RA_ACCEL_CONFIG, 0x0);
                 }
-                if ( tilt_r <= -10)
-                    tilt_r = -10;
+                tilt_r = atan2f(mpu_buf[1], mpu_buf[2])*180/M_PI;
+                //tilt_r = mpu_buf[1]*180/M_PI;
 
-                if ( tilt >= 40.0 || tilt <= -40.0){
-                    pwm = 0;
-                    pwm_cmp = 0;
+                if( init ){
+                    if( err == 0 )
+                        init = 0;
+                    tilt = tilt_r;
+                        #ifdef __AVR_ATmega328P__
+                        // reactivar driver
+//                        PORTB = (1 << PINB3);// | (1 << PINB4);// | (1 << PINB3);
+//                        PORTD = (1 << PIND7);
+                        #endif // __AVR_ATmega328P__
                 }else{
-                    error = sp_tilt - tilt_r;
+                    tilt = (1.0-alpha)*(tilt + mpu_buf[3]*gyro_k) + alpha*tilt_r;
 
-                    pwm = pid_loop_robot(&pid, error, derror);
-                    //pwm_cmp = deadBand_comp(pwm);
-                    pwm_cmp = pwm;
+                    derror = 0 - mpu_buf[3]*gyro_sens;
+
+                    tilt_r = tilt;
+
+                    if (tilt_r >= 10) {
+                        tilt_r = 10;
+                    }
+                    if ( tilt_r <= -10)
+                        tilt_r = -10;
+
+                    if ( tilt >= 40.0 || tilt <= -40.0){
+                        pwm = 0;
+                        pwm_cmp = 0;
+                    }else{
+                        error = sp_tilt - tilt_r;
+
+                        pwm = pid_loop_robot(&pid, error, derror);
+                        //pwm_cmp = deadBand_comp(pwm);
+                        pwm_cmp = pwm;
+                    }
+
+                    pwma = 0.92*(pwm_cmp + pwm_offset);
+                    pwmb = pwm_cmp - pwm_offset;
+
+                    pwmL_duty(pwma);
+                    pwmR_duty(pwmb);
+
                 }
-
-                pwma = 0.92*(pwm_cmp + pwm_offset);
-                pwmb = pwm_cmp - pwm_offset;
-
-//                if (pwma > 0x3ff)
-//                    pwma = 0x3ff;
-//
-//                if (pwma < -0x3ff)
-//                    pwma = -0x3ff;
-//
-//                if (pwmb > 0x3ff)
-//                    pwmb = 0x3ff;
-//
-//                if (pwmb < -0x3ff)
-//                    pwmb = -0x3ff;
-
-                pwmL_duty(pwma);
-                pwmR_duty(pwmb);
-
+            }else{
+                if( calibrar_1 == 0){
+                    // rango +/- 8g
+                    mpu6050_writeReg(0x68, MPU6050_RA_ACCEL_CONFIG, 0x10);
+                    init = 1;
+                }
+                sprintf(buf, "%i\t%i\n", mpu_buf[1], mpu_buf[2]);
+                UART0_sends(buf);
             }
 
+            calibrar_1 = calibrar;
+
             #ifdef ENVIAR_DATOS
-            if( enviar_datos){
+            if( enviar_datos ){
                 UART0_Tx(':');
                 UART0_send_hex16(pwm_cmp);
                 UART0_Tx('\t');
@@ -329,14 +385,14 @@ int main(void)
     //            UART0_Tx('\t');
     //            UART0_send_hex16(mpu_buf[3]);
     //            UART0_Tx('\t');
-                sprintf(buf, "%.2f\t%.2f\n", derror, tilt);
+                sprintf(buf, "%.2f\t%.2f\t%.2f\n", sp_tilt, derror, tilt);
     ////            sprintf(buf, "%i\t%.2X\n", mpu_buf[3], err);
                 UART0_sends(buf);
             }
             #endif
 
             #ifdef USAR_XL7105
-            if ( xl7105_ok == 0){
+            if ( xl7105_ok == 0 ){
                 if( xl7105_rx(joy.ubytes, 7, 1) ){
                     xl7105_cnt = 0;
                     if( modo_joy == 0){ // solo joystick izquierdo

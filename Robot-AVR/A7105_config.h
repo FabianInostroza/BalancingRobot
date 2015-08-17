@@ -23,14 +23,16 @@
 #endif // __AVR_ATmega1284P__
 
 // GIO1 como pin WTR
-#define GIO1 0x01
+//#define GIO1 0x01
+// GIO1 desactivado
+#define GIO1 0x0
 // GIO1 como pin MISO
 //#define GIO1 0x19
 
 // GIO2 desactivado
-#define GIO2 0x00
+//#define GIO2 0x00
 // GIO2 como pin WTR
-//#define GIO2 0x01
+#define GIO2 0x01
 
 #define FL 7 // largo fifo
 
