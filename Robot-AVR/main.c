@@ -36,6 +36,7 @@ ___________________
 #include <stdio.h>
 #include <math.h>
 #include <avr/wdt.h>
+#include <avr/eeprom.h>
 
 #include "twi.h"
 #include "UART.h"
@@ -206,14 +207,15 @@ int main(void)
     //float kc = -170, ti = 0.1, td = 0.135; // con 3*3.7v
     // con 3*3.7v y nueva config mecanica, 2piso mas bajo
     // y placa de terciado en la parte superior
-    float kc = -207, ti = 0.04, td = 0.007;
+    //float kc = -207, ti = 0.04, td = 0.007; // con atmega1284p
+    float kc = -207, ti = 0.15, td = 0.072; // con atmega328p
     // alpha = wc/(1/T0+wc)
     // wc = 1/T0*alpha/(1-alpha) = f0*alpha/(1-alpha)
     // wc = 200*0.02/0.98 = 4.08 rad/s = 0.64 Hz
-    const float alpha = 0.02;
+    const float alpha = 0.005;
     const float t0 = 1.0/200.0;
-    const float gyro_sens = 1.0/131.0; // +/-250 deg/s
-    //const float gyro_sens = 1/65.5; // +/-500 deg/s
+    //const float gyro_sens = 1.0/131.0; // +/-250 deg/s
+    const float gyro_sens = 1/65.5; // +/-500 deg/s
     //const float gyro_sens = 1/32.8; // +/-1000 deg/s
     const float gyro_k = gyro_sens*t0; // pal filtro complementario
     float tilt = 90, tilt_r = 90, derror = 0;

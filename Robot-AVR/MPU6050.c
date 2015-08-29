@@ -27,8 +27,9 @@ uint8_t setupMPU6050(uint8_t addr)
 
     err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0x10);// +/- 1000 deg/s
     err |= mpu6050_gyroCal(addr);
-    //err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0x08);// +/-500 deg/s
-    err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0); // +/-250 deg/s
+    err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0x08);// +/-500 deg/s
+    //err |= mpu6050_writeReg(addr, MPU6050_RA_GYRO_CONFIG, 0); // +/-250 deg/s
+
     // activar pruebas del acelerometro, rango = +/-8g
     //err = mpu6050_writeReg(addr, MPU6050_RA_ACCEL_CONFIG, 0x10);
     //err |= mpu6050_setAccelOffsets(0x68, (2), (-40), (1756-2048));

@@ -10,8 +10,8 @@ MainWindow::MainWindow(QWidget *parent) :
     plot = new QCustomPlot();
     plot2 = new QCustomPlot();
 
-    layout->addWidget(plot, 0, 0, 3, 1);
-    layout->addWidget(plot2, 3, 0, 3, 1);
+    layout->addWidget(plot, 0, 0, 6, 1);
+    layout->addWidget(plot2, 6, 0, 6, 1);
 
     QList<QSerialPortInfo> sp_list = QSerialPortInfo::availablePorts();
 
@@ -31,18 +31,28 @@ MainWindow::MainWindow(QWidget *parent) :
     sp->setMinimum(-200);
 
     lcd_kp = new QLCDNumber(this);
-    lcd_kd = new QLCDNumber(this);
-    lcd_ki = new QLCDNumber(this);
+    lcd_td = new QLCDNumber(this);
+    lcd_ti = new QLCDNumber(this);
     lcd_sp = new QLCDNumber(this);
 
-    layout->addWidget(sp, 0, 1, 5, 1);
-    layout->addWidget(kp, 0, 2, 5, 1);
-    layout->addWidget(ki, 0, 3, 5, 1);
-    layout->addWidget(kd, 0, 4, 5, 1);
-    layout->addWidget(lcd_sp, 5, 1, 1, 1);
-    layout->addWidget(lcd_kp, 5, 2, 1, 1);
-    layout->addWidget(lcd_ki, 5, 3, 1, 1);
-    layout->addWidget(lcd_kd, 5, 4, 1, 1);
+    lblSp = new QLabel("Sp");
+    lblKp = new QLabel("Kp");
+    lblTi = new QLabel("Ti");
+    lblTd = new QLabel("Td");
+
+    layout->addWidget(lblSp, 0, 1, 1, 1);
+    layout->addWidget(lblKp, 0, 2, 1, 1);
+    layout->addWidget(lblTi, 0, 3, 1, 1);
+    layout->addWidget(lblTd, 0, 4, 1, 1);
+
+    layout->addWidget(sp, 1, 1, 10, 1);
+    layout->addWidget(kp, 1, 2, 10, 1);
+    layout->addWidget(ki, 1, 3, 10, 1);
+    layout->addWidget(kd, 1, 4, 10, 1);
+    layout->addWidget(lcd_sp, 11, 1, 1, 1);
+    layout->addWidget(lcd_kp, 11, 2, 1, 1);
+    layout->addWidget(lcd_ti, 11, 3, 1, 1);
+    layout->addWidget(lcd_td, 11, 4, 1, 1);
 
     serial_thread = new QThread();
     //serialReader = new SerialComms("/dev/pts/2", 115200);
@@ -56,8 +66,8 @@ MainWindow::MainWindow(QWidget *parent) :
     serial_thread->start();
 
     connect(kp, SIGNAL(valueChanged(int)), this, SLOT(setKp(int)));
-    connect(ki, SIGNAL(valueChanged(int)), this, SLOT(setKi(int)));
-    connect(kd, SIGNAL(valueChanged(int)), this, SLOT(setKd(int)));
+    connect(ki, SIGNAL(valueChanged(int)), this, SLOT(setTi(int)));
+    connect(kd, SIGNAL(valueChanged(int)), this, SLOT(setTd(int)));
     connect(sp, SIGNAL(valueChanged(int)), this, SLOT(setSp(int)));
     //connect(kp, SIGNAL(valueChanged(int)), this->lcd_kp, SLOT(display(int)));
     //connect(ki, SIGNAL(valueChanged(int)), this->lcd_ki, SLOT(display(int)));
@@ -132,7 +142,8 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     qDebug("chao");
-    this->serialReader->write("t");
+    //this->serialReader->write("t");
+    emit enviar("t");
     this->serialReader->stop();
     //this->serial_thread->quit();
     //this->serial_thread->wait();
@@ -176,8 +187,8 @@ void MainWindow::readData(QByteArray * d)
     
     if (list.length() >= 3){
         int16_t pwm = ((int16_t)list[0].toInt(&ok, 16));
-        tilt = 10*list[2].toFloat();
-        derror = list[1].toFloat();
+        tilt = 10*list[3].toFloat();
+        derror = list[2].toFloat();
 
         this->plot2->graph(0)->addData(time, tilt);
         this->plot2->graph(0)->removeDataBefore(time-width);
@@ -225,19 +236,19 @@ void MainWindow::setKp(int kp)
     emit enviar(msg.toAscii());
 }
 
-void MainWindow::setKd(int kd)
+void MainWindow::setTd(int td)
 {
-    QString msg = QString("d:%1:").arg(kd, 4, 16 );
+    QString msg = QString("d:%1:").arg(td, 4, 16 );
     msg.remove(2, msg.length()-4-3);
-    this->lcd_kd->display(kd*0.001);
+    this->lcd_td->display(td*0.001);
     emit enviar(msg.toAscii());
 }
 
-void MainWindow::setKi(int ki)
+void MainWindow::setTi(int ti)
 {
-    QString msg = QString("i:%1:").arg(ki, 4, 16);
+    QString msg = QString("i:%1:").arg(ti, 4, 16);
     msg.remove(2, msg.length()-4-3);
-    this->lcd_ki->display(ki*0.01);
+    this->lcd_ti->display(ti*0.01);
     emit enviar(msg.toAscii());
 }
 

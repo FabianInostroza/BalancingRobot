@@ -12,6 +12,7 @@
 #include <QThread>
 #include <QLCDNumber>
 #include <QSlider>
+#include <QLabel>
 #include "serialcomms.h"
 
 class MainWindow : public QWidget
@@ -28,8 +29,8 @@ protected slots:
 
 private slots:
     void setKp(int kp);
-    void setKd(int kd);
-    void setKi(int ki);
+    void setTd(int td);
+    void setTi(int ti);
     void setSp(int sp);
 private:
     QDial * dial;
@@ -47,10 +48,13 @@ private:
     QSlider * ki;
     QSlider * sp;
     QLCDNumber * lcd_kp;
-    QLCDNumber * lcd_kd;
-    QLCDNumber * lcd_ki;
+    QLCDNumber * lcd_td;
+    QLCDNumber * lcd_ti;
     QLCDNumber * lcd_sp;
-
+    QLabel * lblSp;
+    QLabel * lblKp;
+    QLabel * lblTi;
+    QLabel * lblTd;
 signals:
     //void updateKp(QByteArray s);
     //void updateKd(QByteArray s);
